@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>fetch_demos</name>
+  <version>0.0.0</version>
+  <description>Fetch Demos: demonstrations which run on Fetch robots, on Hardware and in Gazebo</description>
+  <maintainer email="amoriarty@fetchrobotics.com">Alex Moriarty</maintainer>
+
+  <license>BSD</license>
+  <url type="website">https://docs.fetchrobotics.com</url>
+  <url type="repository">https://github.com/fetchrobotics/fetch_demos</url>
+  <url type="bugtracker">https://github.com/fetchrobotics/fetch_demos/issues</url>
+  <url type="wiki">https://wiki.ros.org/fetch_demos</url>
+
+  <author email="amoriarty@fetchrobotics.com">Alex Moriarty</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>fetch_demos_common</exec_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+</package>

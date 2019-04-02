@@ -1,2 +1,4 @@
-# fetch_demos
-Fetch Robot demonstration and example ROS packages
+fetch_demos
+-----------
+
+Fetch Robot Demonstrations and example ROS packages.
