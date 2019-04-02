@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>fetch_grasp_cube_demo</name>
+  <version>0.0.0</version>
+  <description>
+    A demonstration where the Fetch grasps coloured cubes from a table, and places them into matching bins.
+  </description>
+  <author></author>
+  <maintainer email="amoriarty@fetchrobotics.com">Alex Moriarty</maintainer>
+  <maintainer email="narora@fetchrobotics.com">Niharika Arora</maintainer>
+  <maintainer email="selliott@fetchrobotics.com">Sarah Elliott</maintainer>
+  <license>BSD</license>
+  <url>http://ros.org/wiki/fetch_grasp_cube_demo</url>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+</package>
