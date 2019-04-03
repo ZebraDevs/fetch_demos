@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>fetch_demos_common</name>
+  <version>0.0.0</version>
+  <description>
+    common code shared by for fetch_demos.
+  </description>
+  <maintainer email="amoriarty@fetchrobotics.com">Alex Moriarty</maintainer>
+  <maintainer email="narora@fetchrobotics.com">Niharika Arora</maintainer>
+  <maintainer email="selliott@fetchrobotics.com">Sarah Elliott</maintainer>
+  <license>BSD</license>
+  <url>http://ros.org/wiki/fetch_demos_common</url>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+</package>
