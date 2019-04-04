@@ -1,0 +1,11 @@
+# Define the goal
+uint32   num
+---
+# Define the result
+grasping_msgs/Object[] objects
+grasping_msgs/Object[] surfaces
+---
+# Define a feedback message
+# objects found so far
+grasping_msgs/Object[] objects
+grasping_msgs/Object[] surfaces

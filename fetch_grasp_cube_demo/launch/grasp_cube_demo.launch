@@ -1,0 +1,19 @@
+<launch>
+  <!-- Start MoveIt -->
+  <include file="$(find fetch_moveit_config)/launch/move_group.launch" >
+    <rosparam command="load" file="$(find fetch_moveit_config)/config/kinematics.yaml"/>
+    <arg name="allow_active_sensing" value="true"/> <!-- allow the realtime octomap if true -->
+    <arg name="info" value="true"/><!-- publish grasp markers -->
+  </include>
+  
+  <!-- Perception Node-->
+  <node name="fetch_demos_clustering" pkg="fetch_demos_common" type="fetch_demos_clustering" output="screen" >
+    <rosparam command="load" file="$(find fetch_grasp_cube_demo)/config/perception.yaml" />
+  </node>
+
+  <!-- planning node -->
+  <node name="fetch_demos_grasp_cube" pkg="fetch_grasp_cube_demo" type="grasp_cube_demo.py" output="screen" >
+    <rosparam command="load" file="$(find fetch_grasp_cube_demo)/config/grasp_cube_demo.yaml" />  
+  </node>
+
+</launch>
