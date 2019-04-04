@@ -1,0 +1,8 @@
+<launch>
+  <!-- Perception Node-->
+  <node name="fetch_demos_clustering" pkg="fetch_demos_common" type="fetch_demos_clustering" output="screen" >
+    <rosparam command="load" file="$(find fetch_demos_common)/config/fetch_demos_common_clustering.yaml" />
+  </node>
+
+
+</launch>
