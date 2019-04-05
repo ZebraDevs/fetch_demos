@@ -94,7 +94,7 @@ class perceptionClient(object):
         if get_object_result.objects :
             rospy.loginfo("got the objects!")
             for obj in get_object_result.objects:
-                if obj.name == "bin":
+                if obj.point_cluster.width > 500: # param
                     obj.primitives[0].dimensions = [obj.primitives[0].dimensions[0] + 0.025,
                                                     obj.primitives[0].dimensions[1] + 0.03,
                                                     obj.primitives[0].dimensions[2] + 0.02]
@@ -140,7 +140,7 @@ class perceptionClient(object):
                               obj.point_cluster.width)
                 rospy.loginfo("object name: %s", obj.name)
                 if self.check_graspable(obj):
-                    if obj.name == "cube":
+                    if obj.point_cluster.width < 300: # param
                         obj.name = "cube" + str(i)
                         rospy.loginfo("appending object: %s", obj.name)
                         i = i + 1

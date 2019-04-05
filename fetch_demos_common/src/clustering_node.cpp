@@ -1,6 +1,7 @@
 #include <fetch_demos_common/clustering_node.h>
 #include <pluginlib/class_list_macros.h>
 
+PLUGINLIB_EXPORT_CLASS(fetch_demos_common::PerceptionNode, nodelet::Nodelet)
 namespace fetch_demos_common
 {
 
@@ -34,4 +35,3 @@ namespace fetch_demos_common
     }
 
 }
-PLUGINLIB_EXPORT_CLASS(fetch_demos_common::PerceptionNode, nodelet::Nodelet)
