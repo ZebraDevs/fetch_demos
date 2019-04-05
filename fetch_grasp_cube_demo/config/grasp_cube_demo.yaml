@@ -1,4 +1,7 @@
 clustering_topic : "fetch_demos_clustering/perception_cluser_objs"
+recognition:
+  bin_pt_size_min : 500
+  cube_pt_size_max : 300
 planning:
   tolerance : 0.02
   planner : "KPIECEkConfigDefault"
