@@ -94,7 +94,7 @@ class perceptionClient(object):
         if get_object_result.objects :
             rospy.loginfo("got the objects!")
             for obj in get_object_result.objects:
-                if obj.point_cluster.width > 500: # param
+                if obj.point_cluster.width > bin_pt_size_min_: 
                     obj.primitives[0].dimensions = [obj.primitives[0].dimensions[0] + 0.025,
                                                     obj.primitives[0].dimensions[1] + 0.03,
                                                     obj.primitives[0].dimensions[2] + 0.02]
@@ -140,7 +140,7 @@ class perceptionClient(object):
                               obj.point_cluster.width)
                 rospy.loginfo("object name: %s", obj.name)
                 if self.check_graspable(obj):
-                    if obj.point_cluster.width < 300: # param
+                    if obj.point_cluster.width < cube_pt_size_max_: # param
                         obj.name = "cube" + str(i)
                         rospy.loginfo("appending object: %s", obj.name)
                         i = i + 1
@@ -493,6 +493,8 @@ if __name__ == "__main__":
     rospy.init_node(node_name)
 
     clustering_topic_ = rospy.get_param(node_name + '/clustering_topic')
+    bin_pt_size_min_ = rospy.get_param(node_name + '/recognition/bin_pt_size_min')
+    cube_pt_size_max_ = rospy.get_param(node_name + '/recognition/cube_pt_size_max')
     tolerance_ = rospy.get_param(node_name + '/planning/tolerance')
     planner_ = rospy.get_param(node_name + '/planning/planner')
     move_group_ = rospy.get_param(node_name + '/planning/move_group')
