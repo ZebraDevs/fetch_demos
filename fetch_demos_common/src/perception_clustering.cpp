@@ -1,5 +1,5 @@
 #include <fetch_demos_common/perception_clustering.h>
-namespace fetch_demos
+namespace fetch_demos_perception
 {
 
 PerceptionClustering::PerceptionClustering(ros::NodeHandle& nh): nh_(nh), debug_(true)
@@ -549,4 +549,4 @@ PerceptionClustering::pcPtr2Objectmsg(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in_
 
 }
 
-}// end of fetch_demos namespace
+}// end of fetch_demos_perception namespace

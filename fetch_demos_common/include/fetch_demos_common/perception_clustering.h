@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <math.h> 
-#include <mutex>
 // PCL
 #include <pcl/ModelCoefficients.h>
 #include <pcl/PCLPointCloud2.h>
@@ -46,7 +45,7 @@
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 
 #define PI 3.14159265
-namespace fetch_demos
+namespace fetch_demos_perception
 {
 
 class PerceptionClustering
@@ -104,8 +103,6 @@ private:
 
 };
 
-
-
-} // end of fetch_demos namespace
+} // end of fetch_demos_perception namespace
 
 #endif

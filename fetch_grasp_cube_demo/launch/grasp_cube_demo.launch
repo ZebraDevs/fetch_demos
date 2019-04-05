@@ -7,9 +7,8 @@
   </include>
   
   <!-- Perception Node-->
-  <node name="fetch_demos_clustering" pkg="fetch_demos_common" type="fetch_demos_clustering" output="screen" >
-    <rosparam command="load" file="$(find fetch_grasp_cube_demo)/config/perception.yaml" />
-  </node>
+  <include file="$(find fetch_demos_common)/launch/fetch_demos_clustering.launch" >
+  </include>
 
   <!-- planning node -->
   <node name="fetch_demos_grasp_cube" pkg="fetch_grasp_cube_demo" type="grasp_cube_demo.py" output="screen" >
