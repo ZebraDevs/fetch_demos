@@ -56,7 +56,7 @@ public:
 
 private:
     void cb(const sensor_msgs::PointCloud2ConstPtr& cloud);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr pc2_filtering(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& incloud_ptr);
+    void pc2_filtering(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& incloud_ptr, pcl::PointCloud<pcl::PointXYZRGB>::Ptr& outcloud_ptr);
     void planeRemoval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& inpcPtr);
     std::vector<grasping_msgs::Object> euclideanCluster(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_pcPtr);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointCloud2msgtoPCL(const sensor_msgs::PointCloud2ConstPtr& cloud2_msg);
@@ -65,7 +65,7 @@ private:
     std::string color_extractor(pcl::PointXYZHSV& pointHSV);
     void head_lookat(double x, double y, double z, std::string frame_name);
     geometry_msgs::TransformStamped lookup_transform(std::string target_frame, std::string source_frame);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr scanScene(int degree_start=-30, int degree_end=30);
+    void scanScene(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input_pcPtr, int degree_start=-30, int degree_end=30);
     bool extractUnorientedBoundingBox(pcl::PointCloud<pcl::PointXYZRGB>& input, shape_msgs::SolidPrimitive& shape, geometry_msgs::Pose& pose);
     void pcPtr2Objectmsg(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in_pcPtr, grasping_msgs::Object& input_object_msg, std::string name);
 
@@ -82,6 +82,7 @@ private:
     ros::Publisher sum_cloud_pub_;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_pcPtr_;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_sum_pcPtr_;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr filtered_pcPtr_;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr plane_pcPtr_;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr objects_pcPtr_;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr obstacles_pcPtr_;
