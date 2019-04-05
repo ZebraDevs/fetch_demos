@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   pcl_conversions
   pcl_ros
+  nodelet
 )
 
 add_action_files(
@@ -33,7 +34,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES fetch_demos_common
-  CATKIN_DEPENDS roscpp rospy std_msgs grasping_msgs control_msgs shape_msgs message_runtime actionlib_msgs pcl_conversions pcl_ros
+  CATKIN_DEPENDS roscpp rospy std_msgs grasping_msgs control_msgs shape_msgs message_runtime actionlib_msgs pcl_conversions pcl_ros nodelet
 )
 include_directories(
   include
@@ -46,10 +47,8 @@ include_directories(
 
 add_library(${PROJECT_NAME}
   src/perception_clustering.cpp
+  src/clustering_node.cpp
 )
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_executable(fetch_demos_clustering src/clustering_node.cpp)
-add_dependencies(fetch_demos_clustering ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
 target_link_libraries(fetch_demos_common ${catkin_LIBRARIES} ${Boost_LIBRARIES}  ${PCL_LIBRARIES} yaml-cpp)
-target_link_libraries(fetch_demos_clustering ${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES}  ${PCL_LIBRARIES} yaml-cpp)
 

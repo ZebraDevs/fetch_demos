@@ -1,0 +1,7 @@
+<library path="lib/libfetch_demos_common">
+  <class name="fetch_demos_common/PerceptionNode" type="fetch_demos_common::PerceptionNode" base_class_type="nodelet::Nodelet">
+  <description>
+    The nodelet for fetch perception
+  </description>
+  </class>
+</library>
