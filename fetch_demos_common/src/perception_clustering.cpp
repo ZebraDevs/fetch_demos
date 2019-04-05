@@ -34,18 +34,15 @@ PerceptionClustering::PerceptionClustering(ros::NodeHandle& nh): nh_(nh), debug_
     nh_.getParam("filter/z_max", filter_z_max_); 
     nh_.getParam("filter/axis", filter_z_axis_);
     nh_.getParam("filter/downsample_leaf_size", dwnsample_size_); 
-    
     nh_.getParam("plane_removal/max_iterations", plan_iterations_); 
     nh_.getParam("plane_removal/distance_threshold", plan_distance_); 
     nh_.getParam("plane_removal/table_height_min", table_height_min_); 
     nh_.getParam("plane_removal/table_height_max", table_height_max_); 
     nh_.getParam("plane_removal/prism_z_min", prism_z_min_); 
     nh_.getParam("plane_removal/prism_z_max", prism_z_max_); 
-    
     nh_.getParam("euclidean_cluster/cluster_tolerance", cluster_tolerance_); 
     nh_.getParam("euclidean_cluster/min_size", cluster_min_size_); 
     nh_.getParam("euclidean_cluster/max_size", cluster_max_size_); 
-    
     nh_.getParam("color_extract/red_min", red_min_); 
     nh_.getParam("color_extract/red_max", red_max_); 
     nh_.getParam("color_extract/green_min", green_min_); 
@@ -56,12 +53,8 @@ PerceptionClustering::PerceptionClustering(ros::NodeHandle& nh): nh_(nh), debug_
     nh_.getParam("color_extract/blue_max", blue_max_); 
     nh_.getParam("color_extract/s_threshold", s_threshold_); 
     nh_.getParam("color_extract/v_threshold", v_threshold_); 
+    ROS_INFO("in the init %f, %f", filter_z_min_, filter_z_max_);
 
-    
-    if(debug_)
-    {
-        ROS_INFO("the value of the fileter/zmin: %f", filter_z_min_);
-    }
 }
 
 
@@ -72,14 +65,15 @@ PerceptionClustering::getObjects(fetch_demos_common::GetObjectsResult& result)
     objects_pcPtr_ = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     obstacles_pcPtr_ = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     input_sum_pcPtr_ = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
+    filtered_pcPtr_ = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
 
-    input_sum_pcPtr_ = scanScene();
+    scanScene(input_sum_pcPtr_);
     sum_cloud_pub_.publish(PCLtoPointCloud2msg(input_sum_pcPtr_));
 
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr filtered_pc = pc2_filtering(input_sum_pcPtr_);
-    debug_cloud_pub_.publish(PCLtoPointCloud2msg(filtered_pc));
-    planeRemoval(filtered_pc);
-    ros::Duration(4.0).sleep();
+    pc2_filtering(input_sum_pcPtr_, filtered_pcPtr_);
+    debug_cloud_pub_.publish(PCLtoPointCloud2msg(filtered_pcPtr_));
+    planeRemoval(filtered_pcPtr_);
+    // ros::Duration(4.0).sleep();
     
     std::vector<grasping_msgs::Object> cluster_Objects_msgs = euclideanCluster(objects_pcPtr_);
     for (auto& iter : cluster_Objects_msgs)
@@ -104,26 +98,29 @@ void
 PerceptionClustering::cb(const sensor_msgs::PointCloud2ConstPtr& cloud)
 {
     input_pcPtr_ = pointCloud2msgtoPCL(cloud);
+    // std::cout << input_pcPtr_->points.size() << std::endl;
 }
 
-pcl::PointCloud<pcl::PointXYZRGB>::Ptr 
-PerceptionClustering::pc2_filtering(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& incloud_ptr)
+void 
+PerceptionClustering::pc2_filtering(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& incloud_ptr, pcl::PointCloud<pcl::PointXYZRGB>::Ptr& outcloud_ptr)
 {
   
   // long-range filter only the point cloud within the limit will remain
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_filtered_pc_ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
   pcl::PassThrough<pcl::PointXYZRGB> range_filter;
   range_filter.setFilterFieldName(filter_z_axis_); 
+  
   range_filter.setFilterLimits(filter_z_min_, filter_z_max_);
   range_filter.setInputCloud(incloud_ptr);
-  range_filter.filter(*output_filtered_pc_ptr);
+  range_filter.filter(*incloud_ptr);
+  ROS_INFO("in the pc2_filtering %f, %f", 0.0, 2.5);
 
   // downsample the pointcloud
   pcl::VoxelGrid<pcl::PointXYZRGB> downsampler;
-  downsampler.setInputCloud(output_filtered_pc_ptr);
+  downsampler.setInputCloud(incloud_ptr);
   downsampler.setLeafSize(dwnsample_size_, dwnsample_size_, dwnsample_size_);
-  downsampler.filter(*output_filtered_pc_ptr);
-  return output_filtered_pc_ptr;
+  downsampler.filter(*outcloud_ptr);
+
 }
 
 
@@ -426,8 +423,8 @@ PerceptionClustering::lookup_transform(std::string target_frame, std::string sou
   return transformStamped;
 }
 
-pcl::PointCloud<pcl::PointXYZRGB>::Ptr
-PerceptionClustering::scanScene(int degree_start, int degree_end)
+void
+PerceptionClustering::scanScene(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input_pcPtr, int degree_start, int degree_end)
 {
   // get the height of the head pose and look at the origin at half of the head height
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr sum_pcPtr(new pcl::PointCloud<pcl::PointXYZRGB>());
@@ -458,18 +455,15 @@ PerceptionClustering::scanScene(int degree_start, int degree_end)
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed_cloud (new pcl::PointCloud<pcl::PointXYZRGB> ());
     pcl_ros::transformPointCloud (*input_pcPtr_, *transformed_cloud, transform);
     *sum_pcPtr += *transformed_cloud;
-    // ros::Duration(1.0).sleep();
 
   }
   ros::Duration(1.0).sleep();
   head_lookat(1.0, 0.0, pt_head.point.z / 2, "base_link");
   
-  pcl_ros::transformPointCloud (*sum_pcPtr, *input_sum_pcPtr_, initial_transform);
+  pcl_ros::transformPointCloud (*sum_pcPtr, *input_pcPtr, initial_transform);
 
   ROS_INFO("finish scanning");
-  // ros::Duration(1.0).sleep();
-
-  return input_sum_pcPtr_;
+  ros::Duration(1.0).sleep();
 }
 
 bool 
