@@ -266,6 +266,7 @@ PerceptionClustering::euclideanCluster(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in
   grasping_msgs::Object clusters_object_msg;
 
   // write all the clustered object into one cloud
+  int i = 0;
   pcl::PCDWriter writer;
   for (std::vector<pcl::PointIndices>::const_iterator pt_iter = cluster_indices.begin(); pt_iter != cluster_indices.end(); pt_iter++){
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr clusterPtr (new pcl::PointCloud<pcl::PointXYZRGB>());
@@ -287,20 +288,16 @@ PerceptionClustering::euclideanCluster(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in
  
     // write the information into an object msg
     grasping_msgs::Object clusters_object_msg;
-    if (clusterPtr->width > 500)
-    {
-      pcPtr2Objectmsg(clusterPtr, clusters_object_msg, "bin");
-    }
-    else
-    {
-      pcPtr2Objectmsg(clusterPtr, clusters_object_msg, "cube");      
-    }
+    std::string obj_name = "object" + std::to_string(i);
+    pcPtr2Objectmsg(clusterPtr, clusters_object_msg, obj_name);
+    ROS_INFO("num of obj: %i", i);
     
     clusters_object_msg.properties.resize(1);
     clusters_object_msg.properties[0].name = "color";
     clusters_object_msg.properties[0].value = color_extractor(avgPointHSV);
    
     cluster_result.push_back(clusters_object_msg);
+    i++;
 
   }
   ROS_INFO("out the clustering");
