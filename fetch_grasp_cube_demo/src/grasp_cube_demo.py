@@ -7,7 +7,7 @@ import moveit_msgs.msg
 import rospy
 import tf2_geometry_msgs
 import tf2_ros
-from fetch_demos_common.fetch_api import PointHeadClient
+from fetch_demos_common.fetch_api import PointHeadClient, GripperClient
 # from control_msgs.msg import (FollowJointTrajectoryAction,
 #                               FollowJointTrajectoryGoal, GripperCommandAction,
 #                               GripperCommandGoal, PointHeadAction,
@@ -182,28 +182,12 @@ class graspingClient(object):
         
         self.move_group = MoveGroupInterface(move_group_, "base_link")
         self.move_group.setPlannerId(planner_)
-        self.gripper_client = actionlib.SimpleActionClient("gripper_controller/gripper_action", GripperCommandAction)
-        rospy.loginfo("Waiting for graspingClient...")
-        self.gripper_client.wait_for_server()
+        self.gripper_client = GripperClient()
         self.attached_obj_pub = rospy.Publisher("attached_collision_object", AttachedCollisionObject, queue_size=10)
         self.planning_scene.is_diff = True 
         self._pick_action = actionlib.SimpleActionClient("place", PlaceAction)
         self._pick_action.wait_for_server()
         self.angle = angle_min_
-
-
-    def close_gripper_to(self, position, max_effor=90):
-        goal = GripperCommandGoal()
-        goal.command.position = position
-        goal.command.max_effort = max_effor # 50 is gentle grasp
-        self.gripper_client.send_goal(goal)
-        self.gripper_client.wait_for_result()
-
-    def fully_open_gripper(self):
-        self.close_gripper_to(0.1)
-    
-    def fully_close_gripper(self):
-        self.close_gripper_to(0.0)
 
     def tuck(self):
         joints = ["shoulder_pan_joint", "shoulder_lift_joint", "upperarm_roll_joint",
@@ -324,7 +308,7 @@ class graspingClient(object):
 
     def pick(self, obj, retry=2):
         rospy.loginfo("plicking the object, %s", obj.name)
-        self.fully_open_gripper()
+        self.gripper_client.fully_open_gripper()
         
         input_retry = retry
         success = False
@@ -380,7 +364,7 @@ class graspingClient(object):
         
         rospy.loginfo("closing the gripper")
         self.makeAttach(obj)
-        self.close_gripper_to(close_gripper_to_)
+        self.gripper_client.close_gripper_to(close_gripper_to_)
 
         rospy.loginfo("done picking")
         return True
@@ -401,15 +385,7 @@ class graspingClient(object):
 
         place_poseStamped.pose = bin_pose
         place_poseStamped.pose.position.z += z_diff_bin_
-        # move to the first picking pose
-        # move_pose_result = self.move_group.moveToPose(first_poseStamped, "gripper_link", tolerance=tolerance_)
-        # rospy.sleep(1.0)
-        # if move_pose_result.error_code.val == MoveItErrorCodes.NO_IK_SOLUTION:
-        #     rospy.loginfo("no valid IK found")       
-        # if move_pose_result.error_code.val == MoveItErrorCodes.SUCCESS:
-        #     pass
-        # else:
-        #     rospy.loginfo(move_pose_result.error_code.val)
+
         current_retry = retry
         current_x_diff_total = 0.0
         while current_retry > 0:
@@ -436,7 +412,7 @@ class graspingClient(object):
         self.remove_attached_object(obj.name, "gripper_link")
         self.planning_scene.removeAttachedObject(obj.name, True)
 
-        self.fully_open_gripper()
+        self.gripper_client.fully_open_gripper()
         return True
     def remove_attached_object(self, name, link_frame):
         o = AttachedCollisionObject()
@@ -485,7 +461,7 @@ if __name__ == "__main__":
     x_diff_bin_min_ = rospy.get_param(node_name + '/placing/x_diff_bin_min')
 
     perception_client = perceptionClient()
-    head_action = PointHeadClient(rospy)
+    head_action = PointHeadClient()
     grasping_client = graspingClient()
     grasping_client.intermediate_stow()
     grasping_client.stow()
@@ -531,7 +507,7 @@ if __name__ == "__main__":
                 grasping_client.remove_attached_object(obj.name, "gripper_link")
             
             grasping_client.remove_collision_object(obj.name)
-            grasping_client.fully_open_gripper()
+            grasping_client.gripper_client.fully_open_gripper()
             grasping_client.intermediate_stow()
             grasping_client.stow()
             grasping_client.remove_previous_objects()
