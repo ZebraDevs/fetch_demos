@@ -7,10 +7,11 @@ import moveit_msgs.msg
 import rospy
 import tf2_geometry_msgs
 import tf2_ros
-from control_msgs.msg import (FollowJointTrajectoryAction,
-                              FollowJointTrajectoryGoal, GripperCommandAction,
-                              GripperCommandGoal, PointHeadAction,
-                              PointHeadGoal)
+from fetch_demos_common.fetch_api import PointHeadClient
+# from control_msgs.msg import (FollowJointTrajectoryAction,
+#                               FollowJointTrajectoryGoal, GripperCommandAction,
+#                               GripperCommandGoal, PointHeadAction,
+#                               PointHeadGoal)
 from fetch_demos_common.msg import GetObjectsAction, GetObjectsGoal
 from geometry_msgs.msg import (Point, PointStamped, Pose, PoseStamped,
                                Quaternion)
@@ -31,38 +32,7 @@ from tf2_geometry_msgs import PoseStamped
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 import moveit_commander
 
-# gripper pose for placing
-# TODO: replace all the hard-coded value for placing
 
-place_pose_stamped = PoseStamped()
-place_pose_stamped.header.stamp = rospy.Time(0)
-place_pose_stamped.header.frame_id = 'base_link'
-
-place_pose_stamped.pose.position.x = 0.3
-place_pose_stamped.pose.position.y = 0.0
-place_pose_stamped.pose.position.z = 1.0  
-place_pose_stamped.pose.orientation.w = 0.707
-place_pose_stamped.pose.orientation.x = 0.0
-place_pose_stamped.pose.orientation.y = 0.707
-place_pose_stamped.pose.orientation.z = 0.0
-
-class PointHeadClient(object):
-
-    def __init__(self):
-        self.client = actionlib.SimpleActionClient("head_controller/point_head", PointHeadAction)
-        rospy.loginfo("Waiting for head_controller...")
-        self.client.wait_for_server()
-
-    def look_at(self, x, y, z, frame, duration=1.0):
-        goal = PointHeadGoal()
-        goal.target.header.stamp = rospy.Time.now()
-        goal.target.header.frame_id = frame
-        goal.target.point.x = x
-        goal.target.point.y = y
-        goal.target.point.z = z      
-        goal.min_duration = rospy.Duration(duration)
-        self.client.send_goal(goal)
-        self.client.wait_for_result()
 
 class perceptionClient(object):
     def __init__(self):
@@ -515,7 +485,7 @@ if __name__ == "__main__":
     x_diff_bin_min_ = rospy.get_param(node_name + '/placing/x_diff_bin_min')
 
     perception_client = perceptionClient()
-    head_action = PointHeadClient()
+    head_action = PointHeadClient(rospy)
     grasping_client = graspingClient()
     grasping_client.intermediate_stow()
     grasping_client.stow()

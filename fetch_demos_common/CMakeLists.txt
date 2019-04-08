@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   nodelet
 )
+catkin_python_setup()
 
 add_action_files(
   FILES
@@ -52,3 +53,5 @@ add_library(${PROJECT_NAME}
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(fetch_demos_common ${catkin_LIBRARIES} ${Boost_LIBRARIES}  ${PCL_LIBRARIES} yaml-cpp)
 
+catkin_install_python(PROGRAMS bin/point_head.py bin/open_gripper.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
