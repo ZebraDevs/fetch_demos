@@ -33,7 +33,7 @@ class GripperClient(object):
         self.gripper_client.wait_for_server()
         rospy.loginfo("The gripper controller is launched")
 
-    def close_gripper_to(self, position, max_effor=50):
+    def close_gripper_to(self, position, max_effor=90):
         # send the position of the gripper, 0.0 is fully closed and 0.1 is fully open
         goal = GripperCommandGoal()
         goal.command.position = position
