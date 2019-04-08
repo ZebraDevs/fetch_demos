@@ -39,6 +39,8 @@ class graspingClient(object):
         self.planning_scene.is_diff = True 
         self._pick_action = actionlib.SimpleActionClient("place", PlaceAction)
         self._pick_action.wait_for_server()
+        self.tfBuffer = tf2_ros.Buffer()
+        listener = tf2_ros.TransformListener(self.tfBuffer)
 
     def tuck(self):
         joints = ["shoulder_pan_joint", "shoulder_lift_joint", "upperarm_roll_joint",
@@ -103,11 +105,23 @@ class graspingClient(object):
             pose_stamped.pose.orientation.z = orientation[2]
             pose_stamped.pose.orientation.w = orientation[3]
         return pose_stamped
+    def transform_pose(self, pose_stamped, target_frame):
         
-    def makeAttach(self, obj, attached_pose, link_name = 'gripper_link',
+        transform = self.tfBuffer.lookup_transform(target_frame,
+                                        pose_stamped.header.frame_id, 
+                                        rospy.Time(0), 
+                                        rospy.Duration(1.0))
+
+        pose_transformed = tf2_geometry_msgs.do_transform_pose(pose_stamped, transform)
+        return pose_transformed
+
+        
+    def makeAttach(self, obj, link_name = 'gripper_link',
                    touch_links=['gripper_link', 'l_gripper_finger_link', 'r_gripper_finger_link']):
         
         self.planning_scene.removeCollisionObject(obj.name, False)
+        obj_pose = self.make_poseStamped('base_link', obj.primitive_poses[0])
+        attached_pose = self.transform_pose(obj_pose, link_name)
         self.planning_scene.attachBox(obj.name, 
                                       obj.primitives[0].dimensions[0],
                                       obj.primitives[0].dimensions[1],
@@ -150,7 +164,7 @@ class graspingClient(object):
         self.planning_scene.clear()
         self.planning_scene.waitForSync()
 
-    def pick(self, obj, attach_pose,  close_gripper_to=0.02, retry=2, tolerance=0.01, x_diff_pick=-0.01, z_diff_pick=0.1, x_diff_grasp=-0.01, z_diff_grasp=0.01):
+    def pick(self, obj, close_gripper_to=0.02, retry=2, tolerance=0.01, x_diff_pick=-0.01, z_diff_pick=0.1, x_diff_grasp=-0.01, z_diff_grasp=0.01):
         rospy.loginfo("plicking the object, %s", obj.name)
         self.gripper_client.fully_open_gripper()
         angle_tmp = self.angle
@@ -207,7 +221,7 @@ class graspingClient(object):
             return False
         
         rospy.loginfo("closing the gripper")
-        self.makeAttach(obj, attach_pose)
+        self.makeAttach(obj)
         self.gripper_client.close_gripper_to(close_gripper_to)
 
         rospy.loginfo("done picking")

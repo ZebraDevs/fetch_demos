@@ -6,7 +6,6 @@ import actionlib
 import moveit_msgs.msg
 import rospy
 import tf2_geometry_msgs
-import tf2_ros
 from fetch_demos_common.fetch_api import PointHeadClient, GripperClient
 from fetch_demos_common.fetch_grasping import graspingClient
 from fetch_demos_common.msg import GetObjectsAction, GetObjectsGoal
@@ -169,14 +168,6 @@ class perceptionClient(object):
             rospy.loginfo("the request color is not valid")
             return Pose()  
 
-def transform_pose(pose_stamped, target_frame):
-    transform = tfBuffer.lookup_transform(target_frame,
-                                       pose_stamped.header.frame_id, 
-                                       rospy.Time(0), 
-                                       rospy.Duration(1.0))
-
-    pose_transformed = tf2_geometry_msgs.do_transform_pose(pose_stamped, transform)
-    return pose_transformed
 
 def make_poseStamped(frame, pose, orientation=None):
     pose_stamped = PoseStamped()
@@ -213,8 +204,6 @@ if __name__ == "__main__":
     angle_step_ = rospy.get_param(node_name + '/grasping/angle_step')
     angle_max_ = rospy.get_param(node_name + '/grasping/angle_max')
     close_gripper_to_ = rospy.get_param(node_name + '/grasping/close_gripper_to')
-    x_diff_place_ = rospy.get_param(node_name + '/placing/x_diff_place')
-    z_diff_place_ = rospy.get_param(node_name + '/placing/z_diff_place')
     z_diff_bin_ = rospy.get_param(node_name + '/placing/z_diff_bin')
     x_diff_bin_ = rospy.get_param(node_name + '/placing/x_diff_bin')
     z_diff_bin_step_ = rospy.get_param(node_name + '/placing/z_diff_bin_step')
@@ -231,9 +220,6 @@ if __name__ == "__main__":
     grasping_client.intermediate_stow()
     grasping_client.stow()
     rospy.loginfo("successfully initialized")
-
-    tfBuffer = tf2_ros.Buffer()
-    listener = tf2_ros.TransformListener(tfBuffer)
 
     head_action.look_at(1.0, 0.0, 0.5, "base_link")
     place_result = False
@@ -263,11 +249,7 @@ if __name__ == "__main__":
             grasping_client.update_scene(obj_lists, surface_lists)
             grasping_client.print_planning_scene_objs()
             
-            obj_pose = make_poseStamped('base_link', obj.primitive_poses[0], [0.0, 0.0, 0.0, 0.0])
-            attach_pose = transform_pose(obj_pose, 'gripper_link')  
-
             picking_result = grasping_client.pick(obj,
-                                                  attach_pose,
                                                   close_gripper_to=close_gripper_to_, 
                                                   tolerance=tolerance_, 
                                                   x_diff_pick=x_diff_pick_, 

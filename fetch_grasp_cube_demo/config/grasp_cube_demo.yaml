@@ -16,8 +16,6 @@ grasping:
   angle_max : 90.0
   close_gripper_to : 0.02
 placing:
-  x_diff_place : -0.01 
-  z_diff_place : 0.1
   z_diff_bin : 0.15
   x_diff_bin : -0.01
   z_diff_bin_step : 0.01
