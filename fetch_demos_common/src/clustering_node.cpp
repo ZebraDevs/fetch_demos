@@ -15,8 +15,6 @@ namespace fetch_demos_common
     {
         NODELET_DEBUG("Initializing nodelet...");
         ros::NodeHandle nh("~");
-        std::string nodelet_name = ros::this_node::getName();
-        ros::NodeHandle private_nh = getPrivateNodeHandle();
         server_.reset(new server_t(nh, "perception_cluser_objs", 
                                    boost::bind(&PerceptionNode::cb, this, _1),
                                    false));

@@ -27,7 +27,7 @@ import moveit_commander
 
 
 
-class perceptionClient(object):
+class BuildSceneClient(object):
     def __init__(self):
         self.perception_client = actionlib.SimpleActionClient(clustering_topic_, GetObjectsAction)
         rospy.loginfo("Waiting for percetion node...")
@@ -210,7 +210,7 @@ if __name__ == "__main__":
     x_diff_bin_step_ = rospy.get_param(node_name + '/placing/x_diff_bin_step')
     x_diff_bin_min_ = rospy.get_param(node_name + '/placing/x_diff_bin_min')
 
-    perception_client = perceptionClient()
+    perception_client = BuildSceneClient()
     head_action = PointHeadClient()
     grasping_client = graspingClient(move_group=move_group_,
                                      planner=planner_, 
@@ -248,7 +248,7 @@ if __name__ == "__main__":
             grasping_client.remove_previous_objects()
             grasping_client.update_scene(obj_lists, surface_lists)
             grasping_client.print_planning_scene_objs()
-            
+
             picking_result = grasping_client.pick(obj,
                                                   close_gripper_to=close_gripper_to_, 
                                                   tolerance=tolerance_, 
