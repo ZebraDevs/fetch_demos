@@ -3,7 +3,6 @@ import copy
 from math import cos, sin, pi
 
 import actionlib
-import moveit_msgs.msg
 import rospy
 import tf2_geometry_msgs
 from fetch_demos_common.fetch_api import PointHeadClient, GripperClient
@@ -11,19 +10,11 @@ from fetch_demos_common.fetch_grasping import graspingClient
 from fetch_demos_common.msg import GetObjectsAction, GetObjectsGoal
 from geometry_msgs.msg import (Point, PointStamped, Pose, PoseStamped,
                                Quaternion)
-from grasping_msgs.msg import (FindGraspableObjectsAction,
-                               FindGraspableObjectsGoal, GraspPlanningAction,
-                               GraspPlanningGoal, Object)
-from moveit_msgs.msg import (CollisionObject, Grasp, MoveItErrorCodes,
-                             PickupAction, PickupGoal, PlaceAction, PlaceGoal,
-                             PlaceLocation, PlanningScene, AttachedCollisionObject)
-from moveit_python import (MoveGroupInterface, PickPlaceInterface,
-                           PlanningSceneInterface)
-from shape_msgs.msg import Mesh, MeshTriangle, SolidPrimitive
+from grasping_msgs.msg import Object
+from moveit_msgs.msg import MoveItErrorCodes, PlanningScene
+from moveit_python import MoveGroupInterface, PlanningSceneInterface
+from shape_msgs.msg import SolidPrimitive
 from std_msgs.msg import String
-from tf2_geometry_msgs import PoseStamped
-from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-import moveit_commander
 
 
 
