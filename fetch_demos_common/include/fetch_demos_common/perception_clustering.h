@@ -1,26 +1,13 @@
 #ifndef FETCH_DEMOS_COMMON_PERCEPTION_CLUSTERING_H
 #define FETCH_DEMOS_COMMON_PERCEPTION_CLUSTERING_H
-#include <iostream>
-#include <string>
-#include <vector>
-#include <math.h> 
 // PCL
 #include <pcl/ModelCoefficients.h>
-#include <pcl/PCLPointCloud2.h>
-#include <pcl/common/centroid.h>
-#include <pcl/common/transforms.h>
-#include <pcl/conversions.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/voxel_grid.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/kdtree/kdtree.h>
 #include <pcl/kdtree/kdtree.h>
 #include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
 #include <pcl/point_types_conversion.h>
-#include <pcl/sample_consensus/method_types.h>
-#include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
@@ -28,21 +15,17 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/transforms.h>
 // ros
-#include <ros/ros.h>
-#include <ros/console.h>
 #include <actionlib/client/simple_action_client.h>
-#include <fetch_demos_common/GetObjectsAction.h>
-#include <sensor_msgs/PointCloud2.h>
 #include <control_msgs/PointHeadAction.h>
 #include <grasping_msgs/Object.h>
-#include <grasping_msgs/ObjectProperty.h>
-#include <grasping_msgs/FindGraspableObjectsAction.h>
 #include <geometry_msgs/Pose.h>
-#include <geometry_msgs/TransformStamped.h>
-#include <shape_msgs/SolidPrimitive.h>
-#include <tf2_ros/transform_listener.h>
-#include <tf2/LinearMath/Transform.h>
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include <ros/node_handle.h>                  
+#include <ros/publisher.h>                   
+#include <ros/subscriber.h>                   
+#include <tf2_ros/buffer.h>               
+#include "fetch_demos_common/GetObjectsResult.h"    
+
 
 #define PI 3.14159265
 namespace fetch_demos_perception
