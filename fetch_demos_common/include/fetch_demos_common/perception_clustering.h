@@ -1,32 +1,22 @@
 #ifndef FETCH_DEMOS_COMMON_PERCEPTION_CLUSTERING_H
 #define FETCH_DEMOS_COMMON_PERCEPTION_CLUSTERING_H
-// PCL
-#include <pcl/ModelCoefficients.h>
-#include <pcl/filters/extract_indices.h>
-#include <pcl/filters/passthrough.h>
-#include <pcl/filters/voxel_grid.h>
-#include <pcl/kdtree/kdtree.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types_conversion.h>
-#include <pcl/segmentation/extract_clusters.h>
-#include <pcl/segmentation/sac_segmentation.h>
-#include <pcl/segmentation/extract_polygonal_prism_data.h>
-#include <pcl/surface/convex_hull.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl_ros/transforms.h>
-// ros
-#include <actionlib/client/simple_action_client.h>
-#include <control_msgs/PointHeadAction.h>
-#include <grasping_msgs/Object.h>
-#include <geometry_msgs/Pose.h>
-#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
-#include <ros/node_handle.h>                  
-#include <ros/publisher.h>                   
-#include <ros/subscriber.h>                   
-#include <tf2_ros/buffer.h>               
+#include <actionlib/client/simple_action_client.h>  
+#include <control_msgs/PointHeadAction.h>           
+#include <grasping_msgs/Object.h>                   
+#include <pcl/point_cloud.h>                        
+#include <ros/node_handle.h>                        
+#include <ros/publisher.h>                          
+#include <ros/subscriber.h>                         
+#include <sensor_msgs/PointCloud2.h>                
+#include <shape_msgs/SolidPrimitive.h>              
+#include <tf2/transform_storage.h>                  
+#include <tf2_ros/buffer.h>                         
+#include <tf2_ros/transform_listener.h>             
+#include <pcl/impl/point_types.hpp>                 
 #include "fetch_demos_common/GetObjectsResult.h"    
-
-
+#include <geometry_msgs/PointStamped.h>             
+#include <geometry_msgs/Pose.h>                     
+#include <boost/signals2/detail/foreign_ptr.hpp>    
 #define PI 3.14159265
 namespace fetch_demos_perception
 {
