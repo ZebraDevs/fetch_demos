@@ -2,14 +2,12 @@
 #define FETCH_DEMOS_COMMON_CLUSTERING_NODE_H
 // an actoin sever that sends object message 
 
-#include <iostream>
 // ROS 
-#include <ros/ros.h>
+#include <ros/node_handle.h>                  
 #include <actionlib/server/simple_action_server.h>
 #include <fetch_demos_common/perception_clustering.h>
 #include <fetch_demos_common/GetObjectsAction.h>
 #include <nodelet/nodelet.h>
-#include "nodelet/loader.h"
 namespace fetch_demos_common
 {
 class PerceptionNode  : public nodelet::Nodelet
