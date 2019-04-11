@@ -1,0 +1,23 @@
+clustering_topic : "fetch_demos_clustering/perception_cluser_objs"
+recognition:
+  bin_pt_size_min : 500
+  cube_pt_size_max : 300
+planning:
+  tolerance : 0.02
+  planner : "KPIECEkConfigDefault"
+  move_group : "arm"
+grasping:
+  x_diff_pick : -0.01 
+  z_diff_pick : 0.1
+  x_diff_grasp : -0.01
+  z_diff_grasp : 0.01
+  angle_min : 40.0
+  angle_step : 10.0
+  angle_max : 90.0
+  close_gripper_to : 0.02
+placing:
+  z_diff_bin : 0.15
+  x_diff_bin : -0.01
+  z_diff_bin_step : 0.01
+  x_diff_bin_step : 0.01
+  x_diff_bin_min : 0.03

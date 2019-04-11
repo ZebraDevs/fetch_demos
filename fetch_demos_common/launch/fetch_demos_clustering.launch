@@ -1,0 +1,13 @@
+<launch>
+
+  <node pkg="nodelet" type="nodelet" name="fetch_demos_clustering"  args="manager" output="screen">
+    <rosparam command="load" file="$(find fetch_demos_common)/config/fetch_demos_common_clustering.yaml" />
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="clustering_nodelet" args="load fetch_demos_common/PerceptionNode fetch_demos_clustering" output="screen">
+  
+  </node>
+  
+
+
+</launch>
