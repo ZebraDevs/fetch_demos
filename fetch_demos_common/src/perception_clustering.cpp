@@ -23,8 +23,6 @@
 #include <pcl/point_types_conversion.h>
 #include <pcl_ros/transforms.h>
 
- 
-
 namespace fetch_demos_perception
 {
 

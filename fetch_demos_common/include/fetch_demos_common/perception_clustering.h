@@ -1,10 +1,8 @@
 #ifndef FETCH_DEMOS_COMMON_PERCEPTION_CLUSTERING_H
 #define FETCH_DEMOS_COMMON_PERCEPTION_CLUSTERING_H
-// // PCL
-
+// PCL
 #include <pcl/point_cloud.h>
 #include <pcl_conversions/pcl_conversions.h>   
-
 // ros
 #include <actionlib/client/simple_action_client.h>
 #include <control_msgs/PointHeadAction.h>
@@ -22,8 +20,6 @@
 #include <tf2_ros/transform_listener.h>             
 #include <geometry_msgs/PointStamped.h>             
 #include <boost/signals2/detail/foreign_ptr.hpp>  
-
-
 #define PI 3.14159265
 namespace fetch_demos_perception
 {
