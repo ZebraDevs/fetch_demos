@@ -147,13 +147,15 @@ class graspingClient(object):
             self.planning_scene.addSolidPrimitive(obj.name, 
                                               obj.primitives[0], 
                                               obj.primitive_poses[0],
-                                              use_service=True)
+                                              use_service=True)     
+        # param
         for surface in support_surface_lists:
             height = surface.primitive_poses[0].position.z
-            surface.primitives[0].dimensions = [surface.primitives[0].dimensions[0] + 0.02, 
-                                             surface.primitives[0].dimensions[1] + 0.1, 
+            primitive_height = surface.primitives[0].dimensions[2]
+            surface.primitives[0].dimensions = [surface.primitives[0].dimensions[0] + 0.07, 
+                                             surface.primitives[0].dimensions[1] + 0.07, 
                                              surface.primitives[0].dimensions[2] + height]
-            surface.primitive_poses[0].position.z -= height / 2
+            surface.primitive_poses[0].position.z -= (height  + primitive_height) / 2
             self.planning_scene.addSolidPrimitive(surface.name,
                                         surface.primitives[0],
                                         surface.primitive_poses[0],
