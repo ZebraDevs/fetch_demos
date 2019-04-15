@@ -44,7 +44,7 @@ private:
     void scanScene(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input_pcPtr, int degree_start=-30, int degree_end=30);
     bool extractUnorientedBoundingBox(pcl::PointCloud<pcl::PointXYZRGB>& input, shape_msgs::SolidPrimitive& shape, geometry_msgs::Pose& pose);
     void pcPtr2Objectmsg(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in_pcPtr, grasping_msgs::Object& input_object_msg, std::string name);
-
+    void filter_planpc(pcl::PointCloud<pcl::PointXYZRGB>::Ptr plan_source_pcPtr, pcl::PointCloud<pcl::PointXYZRGB>::Ptr plan_out_pcPtr);
     ros::NodeHandle nh_;
     tf2_ros::Buffer tf_buffer_;
     boost::shared_ptr<tf2_ros::TransformListener> tf_Listener_;

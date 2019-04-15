@@ -207,8 +207,10 @@ if __name__ == "__main__":
                                      angle_min=angle_min_,
                                      angle_step=angle_step_,
                                      angle_max=angle_max_)
-    grasping_client.intermediate_stow()
-    grasping_client.stow()
+    # grasping_client.intermediate_stow()
+    # rospy.sleep(5.0)
+    # grasping_client.stow()
+    # rospy.sleep(5.0)
     rospy.loginfo("successfully initialized")
 
     head_action.look_at(1.0, 0.0, 0.5, "base_link")
@@ -234,11 +236,14 @@ if __name__ == "__main__":
                                 obj.primitive_poses[0].position.z,
                                 "base_link")
             rospy.sleep(0.5)
-
             grasping_client.remove_previous_objects()
             grasping_client.update_scene(obj_lists, surface_lists)
             grasping_client.print_planning_scene_objs()
-
+            
+            # grasping_client.intermediate_stow()
+            # rospy.sleep(5.0)
+            grasping_client.stow()
+            rospy.sleep(5.0)
             picking_result = grasping_client.pick(obj,
                                                   close_gripper_to=close_gripper_to_, 
                                                   tolerance=tolerance_, 
@@ -246,26 +251,29 @@ if __name__ == "__main__":
                                                   z_diff_pick=z_diff_pick_, 
                                                   x_diff_grasp=x_diff_grasp_, 
                                                   z_diff_grasp=z_diff_grasp_)
-            if picking_result:
-                bin_pose = perception_client.get_bin_pose(obj.properties[0].value)
-                place_poseStamped = make_poseStamped('base_link', bin_pose, [0.0, 0.0, 0.0, 0.0])
-                place_poseStamped.pose.position.z += z_diff_bin_
+            # if picking_result:
+            #     bin_pose = perception_client.get_bin_pose(obj.properties[0].value)
+            #     place_poseStamped = make_poseStamped('base_link', bin_pose, [0.0, 0.0, 0.0, 0.0])
+            #     place_poseStamped.pose.position.z += z_diff_bin_
 
-                place_result = grasping_client.place(place_poseStamped,
-                                                     obj,
-                                                     tolerance=tolerance_, 
-                                                     x_diff_step=x_diff_bin_step_, 
-                                                     z_diff_step=z_diff_bin_step_, 
-                                                     x_diff_min=x_diff_bin_min_)
-                if place_result is False:
-                    grasping_client.remove_attached_object(obj.name, "gripper_link")
-                    grasping_client.clear_scene()                    
-            else:
-                grasping_client.remove_attached_object(obj.name, "gripper_link")
+            #     place_result = grasping_client.place(place_poseStamped,
+            #                                          obj,
+            #                                          tolerance=tolerance_, 
+            #                                          x_diff_step=x_diff_bin_step_, 
+            #                                          z_diff_step=z_diff_bin_step_, 
+            #                                          x_diff_min=x_diff_bin_min_)
+            #     if place_result is False:
+            #         grasping_client.remove_attached_object(obj.name, "gripper_link")
+            #         grasping_client.clear_scene()                    
+            # else:
+            #     grasping_client.remove_attached_object(obj.name, "gripper_link")
+            rospy.loginfo("scene updated, waiting")
+            rospy.sleep(5.5)
             
             grasping_client.remove_collision_object(obj.name)
-            grasping_client.gripper_client.fully_open_gripper()
-            grasping_client.intermediate_stow()
+            # grasping_client.gripper_client.fully_open_gripper()
+            rospy.sleep(5.0)
+            # grasping_client.intermediate_stow()
             grasping_client.stow()
             grasping_client.remove_previous_objects()
         

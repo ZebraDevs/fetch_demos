@@ -22,6 +22,7 @@
 #include <pcl/surface/convex_hull.h>
 #include <pcl/point_types_conversion.h>
 #include <pcl_ros/transforms.h>
+#include <pcl/filters/statistical_outlier_removal.h>
 
 namespace fetch_demos_perception
 {
@@ -208,6 +209,8 @@ PerceptionClustering::planeRemoval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& inpcP
       // create the polygon for point segmentation http://docs.pointclouds.org/1.7.1/classpcl_1_1_extract_polygonal_prism_data.html
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr hull_points (new pcl::PointCloud<pcl::PointXYZRGB>());
       pcl::ConvexHull<pcl::PointXYZRGB> hull;
+      // TODO: furthur process the pointcloud 
+      filter_planpc(plane_pcPtr_, plane_pcPtr_);
       hull.setInputCloud (plane_pcPtr_);
       hull.reconstruct(*hull_points);
       if(hull.getDimension() == 2){
@@ -228,7 +231,7 @@ PerceptionClustering::planeRemoval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& inpcP
         
         prism.setInputCloud(input_sum_pcPtr_);
         prism.setInputPlanarHull(hull_points);
-        prism.setHeightLimits(-0.04, prism_z_max_);
+        prism.setHeightLimits(-0.1, prism_z_max_+0.1);
         prism.segment(*obstacle_inliers);
 
         extractor_poly.setInputCloud(input_sum_pcPtr_);
@@ -247,6 +250,13 @@ PerceptionClustering::planeRemoval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& inpcP
         extractor_poly.setNegative(true);
         extractor_poly.filter(*obstacles_pcPtr_);
 
+        // param
+        // denoise the pbstacle point cloud
+        pcl::StatisticalOutlierRemoval<pcl::PointXYZRGB> denoise_filter;
+        denoise_filter.setInputCloud (obstacles_pcPtr_);
+        denoise_filter.setMeanK (60);
+        denoise_filter.setStddevMulThresh (1.0);
+        denoise_filter.filter (*obstacles_pcPtr_);
 
         objects_cloud_pub_.publish(PCLtoPointCloud2msg(objects_pcPtr_));
         plane_cloud_pub_.publish(PCLtoPointCloud2msg(plane_pcPtr_));
@@ -468,14 +478,16 @@ PerceptionClustering::scanScene(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input_pc
     double cur_degree = degree_start + i*30;
     ROS_INFO("current degree %f, point %f, %f, %f ", cur_degree, 1.0, sin( cur_degree * PI / 180.0 ), pt_head.point.z);
     head_lookat(1.0, sin( cur_degree * PI / 180.0 ), pt_head.point.z / 2, "base_link");
-    ros::Duration(1.0).sleep();
+    ros::Duration(9.0).sleep();
 
     transformStamped = lookup_transform("base_link", "head_camera_rgb_optical_frame");
     tf::Transform transform;
     tf::transformMsgToTF(transformStamped.transform, transform);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed_cloud (new pcl::PointCloud<pcl::PointXYZRGB> ());
     pcl_ros::transformPointCloud (*input_pcPtr_, *transformed_cloud, transform);
+    ros::Duration(4.0).sleep();
     *sum_pcPtr += *transformed_cloud;
+    ros::Duration(1.0).sleep();
 
   }
   ros::Duration(1.0).sleep();
@@ -563,5 +575,26 @@ PerceptionClustering::pcPtr2Objectmsg(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in_
             input_object_msg.primitive_poses[0].position.z );
 
 }
+
+void 
+PerceptionClustering::filter_planpc(pcl::PointCloud<pcl::PointXYZRGB>::Ptr plan_source_pcPtr, pcl::PointCloud<pcl::PointXYZRGB>::Ptr plan_out_pcPtr)
+{
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmp_plan_pcPtr(new pcl::PointCloud<pcl::PointXYZRGB>());
+  double z_min_plan = plan_source_pcPtr->points[0].z;
+  double z_max_range = 0.46;
+  double z_max_plan = z_min_plan + z_max_range;
+  ROS_INFO("point cloud size before filtering: %i", plan_source_pcPtr->size());
+  for (int i = 0; i < plan_source_pcPtr->size(); i++)
+  {
+    if (plan_source_pcPtr->points[i].z < z_max_plan)
+    {
+      tmp_plan_pcPtr->points.push_back(plan_source_pcPtr->points[i]);
+    }
+  }
+  ROS_INFO("point cloud size after filtering: %i", tmp_plan_pcPtr->size());
+  *plan_out_pcPtr = *tmp_plan_pcPtr;
+
+}
+
 
 }// end of fetch_demos_perception namespace
