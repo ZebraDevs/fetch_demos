@@ -23,6 +23,7 @@
 #include <pcl/point_types_conversion.h>
 #include <pcl_ros/transforms.h>
 #include <pcl/filters/statistical_outlier_removal.h>
+#include "ApproxMVBB/ComputeApproxMVBB.hpp"
 
 namespace fetch_demos_perception
 {
@@ -560,10 +561,18 @@ PerceptionClustering::pcPtr2Objectmsg(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in_
   input_object_msg.primitives.resize(1);
   shape_msgs::SolidPrimitive primitive;
   geometry_msgs::Pose pose;
-  extractUnorientedBoundingBox(*transformed_pcPtr, primitive, pose);
+  if (name == "plane")
+  {
+    extractUnorientedBoundingBox(*transformed_pcPtr, primitive, pose);
+  }
+  else
+  {
+    extract_boundingbox(transformed_pcPtr, primitive, pose);
+  }
+  
   input_object_msg.primitive_poses[0] = pose;
   input_object_msg.primitives[0] = primitive;
-  
+  input_object_msg.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
   ROS_INFO("%s: ", name);
   ROS_INFO("cluster primitives: %f, %f, %f ",
             input_object_msg.primitives[0].dimensions[0],
@@ -594,6 +603,45 @@ PerceptionClustering::filter_planpc(pcl::PointCloud<pcl::PointXYZRGB>::Ptr plan_
   ROS_INFO("point cloud size after filtering: %i", tmp_plan_pcPtr->size());
   *plan_out_pcPtr = *tmp_plan_pcPtr;
 
+}
+
+void
+PerceptionClustering::extract_boundingbox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr object_pcPtr,
+                                         shape_msgs::SolidPrimitive& primitive,
+                                         geometry_msgs::Pose& pose)
+{
+  ApproxMVBB::Matrix3Dyn mvbb_points(3, object_pcPtr->points.size());
+  for (int i = 0; i < object_pcPtr->points.size(); i++)
+  {
+    mvbb_points.col(i) << object_pcPtr->points[i].x, object_pcPtr->points[i].y, object_pcPtr->points[i].z;
+  }
+
+  ApproxMVBB::OOBB oobb = ApproxMVBB::approximateMVBB(mvbb_points, 0.001, object_pcPtr->points.size(), 5, 0, 5);
+  // store the position of the object
+  float position_x =(oobb.m_maxPoint.x() + oobb.m_minPoint.x()) / 2;
+  float position_y =(oobb.m_maxPoint.y() + oobb.m_minPoint.y()) / 2;
+  float position_z =(oobb.m_maxPoint.z() + oobb.m_minPoint.z()) / 2;
+  Eigen::Vector3f oobb_position(position_x, position_y, position_z);
+
+  Eigen::Quaternionf rot(oobb.m_q_KI.w(), oobb.m_q_KI.x(), oobb.m_q_KI.y(), oobb.m_q_KI.z());
+  oobb_position = rot.matrix()*oobb_position;
+  pose.position.x = oobb_position.x();
+  pose.position.y = oobb_position.y();
+  pose.position.z = oobb_position.z();
+
+  // get the orientation of the object
+  pose.orientation.x = rot.x();
+  pose.orientation.y = rot.y();
+  pose.orientation.z = rot.z();
+  pose.orientation.w = rot.w();
+
+  // store the width, height and depth of the object
+  primitive.dimensions.push_back(oobb.m_maxPoint.x() - oobb.m_minPoint.x());
+  primitive.dimensions.push_back(oobb.m_maxPoint.y() - oobb.m_minPoint.y());
+  primitive.dimensions.push_back(oobb.m_maxPoint.z() - oobb.m_minPoint.z());
+  
+  
+  ROS_INFO("in exract_boundingbox, max point: %d, %d, %d, %d", oobb.m_maxPoint[0], oobb.m_maxPoint[1], oobb.m_maxPoint[2]);
 }
 
 
