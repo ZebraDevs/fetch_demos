@@ -160,7 +160,7 @@ class graspingClient(object):
                                         surface.primitives[0],
                                         surface.primitive_poses[0],
                                         use_service = True)
-        self.planning_scene.waitForSync()
+        self.planning_scene.waitForSync(10.0)
 
     def clear_scene(self):
         self.planning_scene.clear()
@@ -174,8 +174,8 @@ class graspingClient(object):
         success = False
         while angle_tmp <= self.angle_max and not success:
             radien = (angle_tmp / 2.0) * (pi / 180.0)
-            orientation = [0.0, sin(radien), 0.0, cos(radien)]
-
+            orientation0 = [0.0, sin(radien), 0.0, cos(radien)]
+            orientation = self.quaternion_multiply(orientation0, obj.primitive_poses[0].orientation)
             first_poseStamped = self.make_poseStamped("base_link", obj.primitive_poses[0], orientation)
             first_poseStamped.pose.position.x += x_diff_pick
             first_poseStamped.pose.position.z += z_diff_pick
@@ -266,7 +266,24 @@ class graspingClient(object):
         o.object.operation = CollisionObject.REMOVE
         o.object.id = name
         self.attached_obj_pub.publish(o)
+        
     def remove_collision_object(self, name):
         self.planning_scene.removeCollisionObject(name, True)
+
+    def quaternion_multiply(self, quaternion0, quaternion1):
+        w1 = quaternion1.w
+        x1 = quaternion1.x
+        y1 = quaternion1.y
+        z1 = quaternion1.z
+
+        w0 = quaternion0[0]
+        x0 = quaternion0[1]
+        y0 = quaternion0[2]
+        z0 = quaternion0[3]
+
+        return [-x1 * x0 - y1 * y0 - z1 * z0 + w1 * w0,
+                x1 * w0 + y1 * z0 - z1 * y0 + w1 * x0,
+                -x1 * z0 + y1 * w0 + z1 * x0 + w1 * y0,
+                x1 * y0 - y1 * x0 + z1 * w0 + w1 * z0]
 
 
