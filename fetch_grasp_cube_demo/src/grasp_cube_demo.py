@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import copy
-from math import cos, sin, pi
+from math import cos, sin, pi, sqrt, pow, fabs, fmod
 import actionlib
 import rospy
 import tf2_geometry_msgs
@@ -14,13 +14,14 @@ from moveit_msgs.msg import MoveItErrorCodes, PlanningScene
 from moveit_python import MoveGroupInterface, PlanningSceneInterface
 from shape_msgs.msg import SolidPrimitive
 from std_msgs.msg import String
+from tf import transformations
 
 
 
 class BuildSceneClient(object):
     def __init__(self):
         self.perception_client = actionlib.SimpleActionClient(clustering_topic_, GetObjectsAction)
-        rospy.loginfo("Waiting for percetion node...")
+        rospy.loginfo("Waiting for perception node...")
         self.perception_client.wait_for_server()
         self.object_lists = []
         self.graspable_objects_list = []
@@ -39,7 +40,7 @@ class BuildSceneClient(object):
         rospy.loginfo("the length of the object list: %i, the length of the grspable objects list: %i",
                      len(self.object_lists), len(self.graspable_objects_list))
         get_object_goal = GetObjectsGoal()
-        rospy.loginfo("Sending goals to percetion node...")
+        rospy.loginfo("Sending goals to perception node...")
         self.perception_client.send_goal(get_object_goal)
         self.perception_client.wait_for_result()
         get_object_result = self.perception_client.get_result()
@@ -47,6 +48,34 @@ class BuildSceneClient(object):
         if get_object_result.objects :
             rospy.loginfo("got the objects!")
             for obj in get_object_result.objects:
+                obj_ori = obj.primitive_poses[0].orientation
+                obj_quat = [obj_ori.x, obj_ori.y, obj_ori.z, obj_ori.w]
+                roll, pitch, yaw = transformations.euler_from_quaternion(obj_quat)
+                rospy.loginfo("in find_objects, roll: %d, pitch: %d, yaw: %d", roll * (180.0 / pi), pitch * (180.0 / pi), yaw * (180.0 / pi))
+                roll_abs = fabs(fmod(roll * (180.0 / pi), 90))
+                pitch_abs = fabs(fmod(pitch * (180.0 / pi), 90))
+                if (roll_abs < 80 and roll_abs > 10) or (pitch_abs < 80 and pitch_abs > 10):
+                    if roll_abs < 80 and roll_abs > 10:
+                        width = obj.primitives[0].dimensions[0]
+                        depth = obj.primitives[0].dimensions[2]  * sin(roll)
+                        height = obj.primitives[0].dimensions[2] * cos(roll)
+                        z_diff = obj.primitives[0].dimensions[1] / 2
+                        obj.primitive_poses[0].position.z -= z_diff
+                        quat = transformations.quaternion_from_euler(0.0, 0.0, yaw)
+
+                    else:
+                        width = obj.primitives[0].dimensions[0]
+                        depth = obj.primitives[0].dimensions[2]  * sin(pitch)
+                        height = obj.primitives[0].dimensions[2] * cos(pitch)
+                        z_diff = obj.primitives[0].dimensions[1] / 2
+                        obj.primitive_poses[0].position.z -= z_diff
+                        quat = transformations.quaternion_from_euler(0.0, 0.0, yaw)
+                        quat = transformations.quaternion_multiply(quat, [0.0, 0.0, 0.707, 0.707])
+
+                    obj.primitives[0].dimensions = [width, depth, height]
+                    new_orientation = Quaternion(quat[0], quat[1], quat[2], quat[3])
+                    obj.primitive_poses[0].orientation = new_orientation
+
                 if obj.point_cluster.width > bin_pt_size_min_: 
                     obj.primitives[0].dimensions = [obj.primitives[0].dimensions[0] + 0.025,
                                                     obj.primitives[0].dimensions[1] + 0.03,

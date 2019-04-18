@@ -479,14 +479,16 @@ PerceptionClustering::scanScene(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input_pc
     double cur_degree = degree_start + i*30;
     ROS_INFO("current degree %f, point %f, %f, %f ", cur_degree, 1.0, sin( cur_degree * PI / 180.0 ), pt_head.point.z);
     head_lookat(1.0, sin( cur_degree * PI / 180.0 ), pt_head.point.z / 2, "base_link");
-    ros::Duration(9.0).sleep();
+    // ros::Duration(6.0).sleep();
+    ros::Duration(1.5).sleep();
 
     transformStamped = lookup_transform("base_link", "head_camera_rgb_optical_frame");
     tf::Transform transform;
     tf::transformMsgToTF(transformStamped.transform, transform);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed_cloud (new pcl::PointCloud<pcl::PointXYZRGB> ());
     pcl_ros::transformPointCloud (*input_pcPtr_, *transformed_cloud, transform);
-    ros::Duration(4.0).sleep();
+    // ros::Duration(4.0).sleep();
+    ros::Duration(1.0).sleep();
     *sum_pcPtr += *transformed_cloud;
     ros::Duration(1.0).sleep();
 
@@ -643,6 +645,5 @@ PerceptionClustering::extract_boundingbox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr
   
   ROS_INFO("in exract_boundingbox, max point: %d, %d, %d, %d", oobb.m_maxPoint[0], oobb.m_maxPoint[1], oobb.m_maxPoint[2]);
 }
-
 
 }// end of fetch_demos_perception namespace

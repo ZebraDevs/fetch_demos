@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   nodelet
   asr_approx_mvbb
+  visualization_msgs
 )
 catkin_python_setup()
 
@@ -33,12 +34,13 @@ generate_messages(
   control_msgs
   actionlib_msgs
   rail_manipulation_msgs
+  visualization_msgs
 )
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES fetch_demos_common
-  CATKIN_DEPENDS roscpp rospy std_msgs grasping_msgs rail_manipulation_msgs control_msgs shape_msgs message_runtime actionlib_msgs pcl_conversions pcl_ros nodelet
+  CATKIN_DEPENDS roscpp rospy std_msgs grasping_msgs rail_manipulation_msgs visualization_msgs control_msgs shape_msgs message_runtime actionlib_msgs pcl_conversions pcl_ros nodelet
 )
 include_directories(
   include
