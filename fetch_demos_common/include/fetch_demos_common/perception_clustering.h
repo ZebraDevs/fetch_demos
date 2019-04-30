@@ -44,7 +44,7 @@ private:
     void scanScene(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input_pcPtr, int degree_start=-30, int degree_end=30);
     bool extractUnorientedBoundingBox(pcl::PointCloud<pcl::PointXYZRGB>& input, shape_msgs::SolidPrimitive& shape, geometry_msgs::Pose& pose);
     void pcPtr2Objectmsg(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in_pcPtr, grasping_msgs::Object& input_object_msg, std::string name);
-    void filter_planpc(pcl::PointCloud<pcl::PointXYZRGB>::Ptr plan_source_pcPtr, pcl::PointCloud<pcl::PointXYZRGB>::Ptr plan_out_pcPtr);
+    void filter_planpc(pcl::PointCloud<pcl::PointXYZRGB>::Ptr plane_source_pcPtr, pcl::PointCloud<pcl::PointXYZRGB>::Ptr plane_out_pcPtr);
     void extract_boundingbox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr object_pcPtr,
                             shape_msgs::SolidPrimitive& primitive,
                             geometry_msgs::Pose& pose);
@@ -72,7 +72,7 @@ private:
     double debug_msg_;
     double filter_z_min_, filter_z_max_;
     double dwnsample_size_;
-    double plan_iterations_, plan_distance_;
+    double plane_iterations_, plane_distance_;
     double table_height_min_, table_height_max_;
     double prism_z_min_, prism_z_max_;
     double cluster_tolerance_, cluster_min_size_, cluster_max_size_;

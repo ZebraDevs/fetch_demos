@@ -13,8 +13,8 @@ grasping:
   z_diff_grasp : 0.01
   angle_min : 40.0
   angle_step : 10.0
-  angle_max : 90.0
-  close_gripper_to : 0.02
+  angle_max : 150.0
+  close_gripper_to : 0.01
 placing:
   z_diff_bin : 0.15
   x_diff_bin : -0.01
