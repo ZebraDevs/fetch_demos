@@ -38,7 +38,6 @@ class graspingClient(object):
         self._pick_action.wait_for_server()
         self.tfBuffer = tf2_ros.Buffer()
         self.marker_pub = rospy.Publisher("grasp_pose_marker", Marker, queue_size=5)
-        # self.publish_coord(Pose())
         listener = tf2_ros.TransformListener(self.tfBuffer)
 
     def tuck(self):
@@ -146,28 +145,23 @@ class graspingClient(object):
                                               use_service=True)     
         # param
         for surface in support_surface_lists:
-            height = surface.primitive_poses[0].position.z
-            primitive_height = surface.primitives[0].dimensions[2]
-            surface.primitives[0].dimensions = [surface.primitives[0].dimensions[0] + 0.07, 
-                                             surface.primitives[0].dimensions[1] + 0.07, 
-                                             surface.primitives[0].dimensions[2] + height]
-            surface.primitive_poses[0].position.z -= (height  + primitive_height) / 2
             self.planning_scene.addSolidPrimitive(surface.name,
                                         surface.primitives[0],
                                         surface.primitive_poses[0],
                                         use_service = True)
-        self.planning_scene.waitForSync(10.0)
+        self.planning_scene.waitForSync()
 
     def clear_scene(self):
         self.planning_scene.clear()
         self.planning_scene.waitForSync()
 
-    def pick(self, obj, close_gripper_to=0.02, retry=2, tolerance=0.01, x_diff_pick=-0.01, z_diff_pick=0.1, x_diff_grasp=-0.01, z_diff_grasp=0.01):
+    def pick(self, obj, close_gripper_to=0.02, retry=1, tolerance=0.01, x_diff_pick=-0.01, z_diff_pick=0.1, x_diff_grasp=-0.01, z_diff_grasp=0.01):
         rospy.loginfo("plicking the object, %s", obj.name)
-        self.publish_coord(obj.primitive_poses[0])
+        # self.publish_coord(obj.primitive_poses[0])
         self.gripper_client.fully_open_gripper()
         angle_tmp = self.angle
         input_retry = retry
+        curr_retry = retry
         success = False
         while angle_tmp <= self.angle_max and not success:
             radien = (angle_tmp / 2.0) * (pi / 180.0)
@@ -185,8 +179,9 @@ class graspingClient(object):
             first_poseStamped = self.make_poseStamped("base_link", obj.primitive_poses[0], gripper_orientation)
             first_poseStamped.pose.position.x += x_diff_pick
             first_poseStamped.pose.position.z += z_diff_pick
-            while retry > 0:
-                rospy.loginfo("picking try on first part: %i, angle: %i, radient: %f", retry, angle_tmp, radien)
+            curr_retry = input_retry
+            while curr_retry > 0:
+                rospy.loginfo("picking try on first part: %i, angle: %i, radient: %f", curr_retry, angle_tmp, radien)
                 move_pose_result = self.move_group.moveToPose(first_poseStamped, "gripper_link", tolerance=tolerance, PLAN_ONLY=True)
                 rospy.sleep(1.0)
                 if move_pose_result.error_code.val == MoveItErrorCodes.SUCCESS:
@@ -196,28 +191,31 @@ class graspingClient(object):
                     if move_pose_result.error_code.val == MoveItErrorCodes.NO_IK_SOLUTION:
                         rospy.loginfo("no valid IK found")                
                     rospy.loginfo(move_pose_result.error_code.val)
-                retry -= 1
+                curr_retry -= 1
             angle_tmp += self.angle_step
-            retry = input_retry
-        if retry == 0:
+        if curr_retry == 0:
             return False
 
-        angle_tmp = self.angle
+        # angle_tmp = self.angle
         success = False
         curr_retry = retry
-        while angle_tmp  <= 90 and not success:
+        while angle_tmp  <= self.angle_max and not success:
             radien = (angle_tmp  / 2) * (pi / 180)
             rot_orientation = Quaternion(0.0, sin(radien), 0.0, cos(radien))
             gripper_orientation = self.quaternion_multiply(yaw_orientation, rot_orientation)
             gripper_pose_stamped = self.make_poseStamped("base_link", obj.primitive_poses[0], gripper_orientation)
             gripper_pose_stamped.pose.position.z += z_diff_grasp
             gripper_pose_stamped.pose.position.x += x_diff_grasp
+            curr_retry = retry
             while curr_retry > 0:
                 rospy.loginfo("picking try on second part: %i, angle: %i, radient: %f", curr_retry, angle_tmp , radien)
                 move_pose_result = self.move_group.moveToPose(gripper_pose_stamped, "gripper_link", tolerance=tolerance)
                 rospy.sleep(1.0)
                 if move_pose_result.error_code.val == MoveItErrorCodes.SUCCESS:
                     success = True
+                    rospy.loginfo("closing the gripper")
+                    self.makeAttach(obj)
+                    self.gripper_client.close_gripper_to(close_gripper_to)
                     break
                 else:
                     if move_pose_result.error_code.val == MoveItErrorCodes.NO_IK_SOLUTION:
@@ -225,14 +223,8 @@ class graspingClient(object):
                     rospy.loginfo(move_pose_result.error_code.val)
                 curr_retry -= 1
             angle_tmp  += self.angle_step
-            curr_retry = retry
         if curr_retry == 0:
             return False
-        
-        rospy.loginfo("closing the gripper")
-        self.makeAttach(obj)
-        self.gripper_client.close_gripper_to(close_gripper_to)
-
         rospy.loginfo("done picking")
         return True
 
