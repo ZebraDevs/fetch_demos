@@ -65,6 +65,8 @@ private:
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr plane_pcPtr_;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr objects_pcPtr_;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr obstacles_pcPtr_;
+    pcl::ModelCoefficients::Ptr plan_coefficients_;
+
 
     std::vector<grasping_msgs::Object> surfaces_lists_;
 

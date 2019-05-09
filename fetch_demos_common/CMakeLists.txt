@@ -56,6 +56,7 @@ add_library(${PROJECT_NAME}
   src/perception_clustering.cpp
   src/clustering_node.cpp
   src/grasp_suggestion_interface.cpp
+  src/shape_extractor.cpp
 )
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${asr_approx_mvbb_TARGETS})
 add_executable(grasp_suggestion_node src/grasp_suggestion_node.cpp)

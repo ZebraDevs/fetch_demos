@@ -1,3 +1,4 @@
+#include <fetch_demos_common/shape_extractor.h>
 #include <fetch_demos_common/perception_clustering.h>
 #include <geometry_msgs/TransformStamped.h>    
 #include <control_msgs/PointHeadGoal.h>        
@@ -35,6 +36,7 @@ PerceptionClustering::PerceptionClustering(ros::NodeHandle& nh): nh_(nh), debug_
     obstacles_pcPtr_ = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     input_pcPtr_ = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     input_sum_pcPtr_ = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
+    plan_coefficients_ = pcl::ModelCoefficients::Ptr(new pcl::ModelCoefficients);
     
     nh_.param("perception/debug_msg", debug_msg_, 0.165);
     tf_Listener_.reset(new tf2_ros::TransformListener(tf_buffer_));
@@ -176,6 +178,7 @@ PerceptionClustering::planeRemoval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& inpcP
     ROS_INFO("inpt_original_size %i", inpt_original_size);
     seg.setInputCloud(inpcPtr);
     seg.segment(*plane_inliers, *coefficients);
+    *plan_coefficients_ =  *coefficients;
     if(plane_inliers->indices.size() == 0){
       ROS_INFO("there is no plane in the provided PointCloud");
       ROS_INFO("out the plane removal");
@@ -330,7 +333,10 @@ PerceptionClustering::euclideanCluster(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in
     clusters_object_msg.properties.resize(1);
     clusters_object_msg.properties[0].name = "color";
     clusters_object_msg.properties[0].value = color_extractor(avgPointHSV);
-   
+
+    shape_extractor::projectPointCloud(clusterPtr, plan_coefficients_, obj_name);
+
+
     cluster_result.push_back(clusters_object_msg);
     i++;
 
