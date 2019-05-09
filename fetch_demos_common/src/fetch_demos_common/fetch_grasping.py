@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 import copy
+<<<<<<< HEAD
 from math import cos, sin, pi, atan2
 import tf2_geometry_msgs
 import actionlib
@@ -10,12 +11,32 @@ from geometry_msgs.msg import (Point, Pose, PoseStamped, Quaternion)
 from grasping_msgs.msg import Object
 from moveit_msgs.msg import (CollisionObject, Grasp, MoveItErrorCodes, PlaceAction,
                              PlanningScene, AttachedCollisionObject)
+=======
+from math import cos, sin, pi
+
+import actionlib
+import moveit_msgs.msg
+import rospy
+import tf2_geometry_msgs
+import tf2_ros
+from fetch_demos_common.fetch_api import GripperClient
+from geometry_msgs.msg import (Point, Pose, PoseStamped)
+from grasping_msgs.msg import Object
+from moveit_msgs.msg import (CollisionObject, Grasp, MoveItErrorCodes,
+                             PickupAction, PickupGoal, PlaceAction, PlaceGoal,
+                             PlaceLocation, PlanningScene, AttachedCollisionObject)
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
 from moveit_python import (MoveGroupInterface, PickPlaceInterface,
                            PlanningSceneInterface)
 from shape_msgs.msg import SolidPrimitive
 from tf2_geometry_msgs import PoseStamped
+<<<<<<< HEAD
 from visualization_msgs.msg import Marker
 from tf import transformations
+=======
+
+
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
 
 
 class graspingClient(object):
@@ -37,7 +58,10 @@ class graspingClient(object):
         self._pick_action = actionlib.SimpleActionClient("place", PlaceAction)
         self._pick_action.wait_for_server()
         self.tfBuffer = tf2_ros.Buffer()
+<<<<<<< HEAD
         self.marker_pub = rospy.Publisher("grasp_pose_marker", Marker, queue_size=5)
+=======
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
         listener = tf2_ros.TransformListener(self.tfBuffer)
 
     def tuck(self):
@@ -98,7 +122,14 @@ class graspingClient(object):
             pose_stamped.pose.orientation.z = 0.0 
             pose_stamped.pose.orientation.w = 0.707
         else:
+<<<<<<< HEAD
             pose_stamped.pose.orientation = orientation
+=======
+            pose_stamped.pose.orientation.x = orientation[0]
+            pose_stamped.pose.orientation.y = orientation[1]
+            pose_stamped.pose.orientation.z = orientation[2]
+            pose_stamped.pose.orientation.w = orientation[3]
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
         return pose_stamped
     def transform_pose(self, pose_stamped, target_frame):
         
@@ -115,7 +146,11 @@ class graspingClient(object):
                    touch_links=['gripper_link', 'l_gripper_finger_link', 'r_gripper_finger_link']):
         
         self.planning_scene.removeCollisionObject(obj.name, False)
+<<<<<<< HEAD
         obj_pose = self.make_poseStamped('base_link', obj.primitive_poses[0], obj.primitive_poses[0].orientation)
+=======
+        obj_pose = self.make_poseStamped('base_link', obj.primitive_poses[0])
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
         attached_pose = self.transform_pose(obj_pose, link_name)
         self.planning_scene.attachBox(obj.name, 
                                       obj.primitives[0].dimensions[0],
@@ -142,9 +177,19 @@ class graspingClient(object):
             self.planning_scene.addSolidPrimitive(obj.name, 
                                               obj.primitives[0], 
                                               obj.primitive_poses[0],
+<<<<<<< HEAD
                                               use_service=True)     
         # param
         for surface in support_surface_lists:
+=======
+                                              use_service=True)
+        for surface in support_surface_lists:
+            height = surface.primitive_poses[0].position.z
+            surface.primitives[0].dimensions = [surface.primitives[0].dimensions[0] + 0.02, 
+                                             surface.primitives[0].dimensions[1] + 0.1, 
+                                             surface.primitives[0].dimensions[2] + height]
+            surface.primitive_poses[0].position.z -= height / 2
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
             self.planning_scene.addSolidPrimitive(surface.name,
                                         surface.primitives[0],
                                         surface.primitive_poses[0],
@@ -155,6 +200,7 @@ class graspingClient(object):
         self.planning_scene.clear()
         self.planning_scene.waitForSync()
 
+<<<<<<< HEAD
     def pick(self, obj, close_gripper_to=0.02, retry=1, tolerance=0.01, x_diff_pick=-0.01, z_diff_pick=0.1, x_diff_grasp=-0.01, z_diff_grasp=0.01):
         rospy.loginfo("plicking the object, %s", obj.name)
         # self.publish_coord(obj.primitive_poses[0])
@@ -182,6 +228,23 @@ class graspingClient(object):
             curr_retry = input_retry
             while curr_retry > 0:
                 rospy.loginfo("picking try on first part: %i, angle: %i, radient: %f", curr_retry, angle_tmp, radien)
+=======
+    def pick(self, obj, close_gripper_to=0.02, retry=2, tolerance=0.01, x_diff_pick=-0.01, z_diff_pick=0.1, x_diff_grasp=-0.01, z_diff_grasp=0.01):
+        rospy.loginfo("plicking the object, %s", obj.name)
+        self.gripper_client.fully_open_gripper()
+        angle_tmp = self.angle
+        input_retry = retry
+        success = False
+        while angle_tmp <= self.angle_max and not success:
+            radien = (angle_tmp / 2.0) * (pi / 180.0)
+            orientation = [0.0, sin(radien), 0.0, cos(radien)]
+
+            first_poseStamped = self.make_poseStamped("base_link", obj.primitive_poses[0], orientation)
+            first_poseStamped.pose.position.x += x_diff_pick
+            first_poseStamped.pose.position.z += z_diff_pick
+            while retry > 0:
+                rospy.loginfo("picking try on first part: %i, angle: %i, radient: %f", retry, self.angle, radien)
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
                 move_pose_result = self.move_group.moveToPose(first_poseStamped, "gripper_link", tolerance=tolerance, PLAN_ONLY=True)
                 rospy.sleep(1.0)
                 if move_pose_result.error_code.val == MoveItErrorCodes.SUCCESS:
@@ -191,6 +254,7 @@ class graspingClient(object):
                     if move_pose_result.error_code.val == MoveItErrorCodes.NO_IK_SOLUTION:
                         rospy.loginfo("no valid IK found")                
                     rospy.loginfo(move_pose_result.error_code.val)
+<<<<<<< HEAD
                 curr_retry -= 1
             angle_tmp += self.angle_step
         if curr_retry == 0:
@@ -209,13 +273,35 @@ class graspingClient(object):
             curr_retry = retry
             while curr_retry > 0:
                 rospy.loginfo("picking try on second part: %i, angle: %i, radient: %f", curr_retry, angle_tmp , radien)
+=======
+                retry -= 1
+            angle_tmp += self.angle_step
+            retry = input_retry
+        if retry == 0:
+            return False
+
+        angle_tmp = self.angle
+        success = False
+        curr_retry = retry
+        while angle_tmp  <= 90 and not success:
+            radien = (angle_tmp  / 2) * (pi / 180)
+            orientation = [0.0, sin(radien), 0.0, cos(radien)]
+            gripper_pose_stamped = self.make_poseStamped("base_link", obj.primitive_poses[0], orientation)
+            gripper_pose_stamped.pose.position.z += z_diff_grasp
+            gripper_pose_stamped.pose.position.x += x_diff_grasp
+            while curr_retry > 0:
+                rospy.loginfo("picking try on second part: %i, angle: %i, radient: %f", curr_retry, self.angle , radien)
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
                 move_pose_result = self.move_group.moveToPose(gripper_pose_stamped, "gripper_link", tolerance=tolerance)
                 rospy.sleep(1.0)
                 if move_pose_result.error_code.val == MoveItErrorCodes.SUCCESS:
                     success = True
+<<<<<<< HEAD
                     rospy.loginfo("closing the gripper")
                     self.makeAttach(obj)
                     self.gripper_client.close_gripper_to(close_gripper_to)
+=======
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
                     break
                 else:
                     if move_pose_result.error_code.val == MoveItErrorCodes.NO_IK_SOLUTION:
@@ -223,8 +309,19 @@ class graspingClient(object):
                     rospy.loginfo(move_pose_result.error_code.val)
                 curr_retry -= 1
             angle_tmp  += self.angle_step
+<<<<<<< HEAD
         if curr_retry == 0:
             return False
+=======
+            curr_retry = retry
+        if curr_retry == 0:
+            return False
+        
+        rospy.loginfo("closing the gripper")
+        self.makeAttach(obj)
+        self.gripper_client.close_gripper_to(close_gripper_to)
+
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
         rospy.loginfo("done picking")
         return True
 
@@ -265,6 +362,7 @@ class graspingClient(object):
         o.object.operation = CollisionObject.REMOVE
         o.object.id = name
         self.attached_obj_pub.publish(o)
+<<<<<<< HEAD
         
     def remove_collision_object(self, name):
         self.planning_scene.removeCollisionObject(name, True)
@@ -378,4 +476,9 @@ class graspingClient(object):
         self.marker_pub.publish(my)
         self.marker_pub.publish(mz)
 
+=======
+    def remove_collision_object(self, name):
+        self.planning_scene.removeCollisionObject(name, True)
+
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
 

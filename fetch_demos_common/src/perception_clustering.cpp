@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include <fetch_demos_common/shape_extractor.h>
 #include <fetch_demos_common/perception_clustering.h>
 #include <geometry_msgs/TransformStamped.h>    
@@ -17,14 +18,37 @@
 #include <pcl/ModelCoefficients.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/passthrough.h>
+=======
+#include <fetch_demos_common/perception_clustering.h>
+#include <geometry_msgs/TransformStamped.h>     
+#include <control_msgs/PointHeadGoal.h>         
+#include <pcl/ModelCoefficients.h>              
+#include <pcl/PCLPointCloud2.h>                 
+#include <pcl/PointIndices.h>                   
+#include <pcl/filters/passthrough.h>            
+#include <pcl/filters/voxel_grid.h>             
+#include <pcl/io/pcd_io.h>                      
+#include <pcl/segmentation/extract_clusters.h>  
+#include <pcl/segmentation/sac_segmentation.h>  
+#include <pcl_conversions/pcl_conversions.h>    
+#include <ros/duration.h>                       
+#include <tf/LinearMath/Transform.h>            
+#include <tf2/exceptions.h>                     
+#include "ros/console.h"                        
+#include <pcl/filters/extract_indices.h>
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
 #include <pcl/kdtree/kdtree.h>
 #include <pcl/point_types_conversion.h>
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
 #include <pcl/surface/convex_hull.h>
+<<<<<<< HEAD
 #include <pcl/point_types_conversion.h>
 #include <pcl_ros/transforms.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include "ApproxMVBB/ComputeApproxMVBB.hpp"
+=======
+#include <pcl_ros/transforms.h>
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
 
 namespace fetch_demos_perception
 {
@@ -36,7 +60,10 @@ PerceptionClustering::PerceptionClustering(ros::NodeHandle& nh): nh_(nh), debug_
     obstacles_pcPtr_ = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     input_pcPtr_ = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     input_sum_pcPtr_ = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
+<<<<<<< HEAD
     plan_coefficients_ = pcl::ModelCoefficients::Ptr(new pcl::ModelCoefficients);
+=======
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
     
     nh_.param("perception/debug_msg", debug_msg_, 0.165);
     tf_Listener_.reset(new tf2_ros::TransformListener(tf_buffer_));
@@ -62,8 +89,13 @@ PerceptionClustering::PerceptionClustering(ros::NodeHandle& nh): nh_(nh), debug_
     nh_.getParam("filter/z_max", filter_z_max_); 
     nh_.getParam("filter/axis", filter_z_axis_);
     nh_.getParam("filter/downsample_leaf_size", dwnsample_size_); 
+<<<<<<< HEAD
     nh_.getParam("plane_removal/max_iterations", plane_iterations_); 
     nh_.getParam("plane_removal/distance_threshold", plane_distance_); 
+=======
+    nh_.getParam("plane_removal/max_iterations", plan_iterations_); 
+    nh_.getParam("plane_removal/distance_threshold", plan_distance_); 
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
     nh_.getParam("plane_removal/table_height_min", table_height_min_); 
     nh_.getParam("plane_removal/table_height_max", table_height_max_); 
     nh_.getParam("plane_removal/prism_z_min", prism_z_min_); 
@@ -161,7 +193,11 @@ PerceptionClustering::planeRemoval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& inpcP
 
   // RANSAC segmentation for plane removal
   // ROS_DEBUG("the size of the input pointcloud %i", inpcPtr->points.size());
+<<<<<<< HEAD
   pcl::PointIndices::Ptr plane_inliers(new pcl::PointIndices);  
+=======
+  pcl::PointIndices::Ptr plan_inliers(new pcl::PointIndices);  
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
   pcl::PointIndices::Ptr obstacle_inliers(new pcl::PointIndices);  
   pcl::SACSegmentation<pcl::PointXYZRGB> seg;
   
@@ -169,28 +205,46 @@ PerceptionClustering::planeRemoval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& inpcP
   seg.setOptimizeCoefficients(true);
   seg.setModelType(pcl::SACMODEL_PLANE); 
   seg.setMethodType(pcl::SAC_RANSAC);
+<<<<<<< HEAD
   seg.setMaxIterations(plane_iterations_);
   seg.setDistanceThreshold(plane_distance_); 
+=======
+  seg.setMaxIterations(plan_iterations_);
+  seg.setDistanceThreshold(plan_distance_); 
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
   
   // use a while loop to extract the planes
   int inpt_original_size = inpcPtr->points.size();
   while(inpcPtr->points.size() > 0.1 * inpt_original_size){
     ROS_INFO("inpt_original_size %i", inpt_original_size);
     seg.setInputCloud(inpcPtr);
+<<<<<<< HEAD
     seg.segment(*plane_inliers, *coefficients);
     *plan_coefficients_ =  *coefficients;
     if(plane_inliers->indices.size() == 0){
+=======
+    seg.segment(*plan_inliers, *coefficients);
+    if(plan_inliers->indices.size() == 0){
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
       ROS_INFO("there is no plane in the provided PointCloud");
       ROS_INFO("out the plane removal");
 
       return;
     }
 
+<<<<<<< HEAD
     // plane_inliers are the indicies for plans
     // extract the plane from the input PointCloud
     pcl::ExtractIndices<pcl::PointXYZRGB> extract_plane; 
     extract_plane.setInputCloud(inpcPtr);
     extract_plane.setIndices(plane_inliers);
+=======
+    // plan_inliers are the indicies for plans
+    // extract the plane from the input PointCloud
+    pcl::ExtractIndices<pcl::PointXYZRGB> extract_plane; 
+    extract_plane.setInputCloud(inpcPtr);
+    extract_plane.setIndices(plan_inliers);
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
     // get the PointCloud of plane
     extract_plane.setNegative(false);
     extract_plane.filter(*plane_pcPtr_);
@@ -213,8 +267,11 @@ PerceptionClustering::planeRemoval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& inpcP
       // create the polygon for point segmentation http://docs.pointclouds.org/1.7.1/classpcl_1_1_extract_polygonal_prism_data.html
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr hull_points (new pcl::PointCloud<pcl::PointXYZRGB>());
       pcl::ConvexHull<pcl::PointXYZRGB> hull;
+<<<<<<< HEAD
       // TODO: furthur process the pointcloud 
       filter_planpc(plane_pcPtr_, plane_pcPtr_);
+=======
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
       hull.setInputCloud (plane_pcPtr_);
       hull.reconstruct(*hull_points);
       if(hull.getDimension() == 2){
@@ -222,11 +279,19 @@ PerceptionClustering::planeRemoval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& inpcP
         prism.setInputCloud(inpcPtr);
         prism.setInputPlanarHull(hull_points);
         prism.setHeightLimits(prism_z_min_, prism_z_max_);
+<<<<<<< HEAD
         prism.segment(*plane_inliers);
 
         pcl::ExtractIndices<pcl::PointXYZRGB> extractor_poly;
         extractor_poly.setInputCloud(inpcPtr);
         extractor_poly.setIndices(plane_inliers);
+=======
+        prism.segment(*plan_inliers);
+
+        pcl::ExtractIndices<pcl::PointXYZRGB> extractor_poly;
+        extractor_poly.setInputCloud(inpcPtr);
+        extractor_poly.setIndices(plan_inliers);
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
         extractor_poly.setNegative(false);
         extractor_poly.filter(*objects_pcPtr_);
         extractor_poly.setNegative(true);
@@ -235,7 +300,11 @@ PerceptionClustering::planeRemoval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& inpcP
         
         prism.setInputCloud(input_sum_pcPtr_);
         prism.setInputPlanarHull(hull_points);
+<<<<<<< HEAD
         prism.setHeightLimits(-0.1, prism_z_max_+0.1);
+=======
+        prism.setHeightLimits(-0.04, prism_z_max_);
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
         prism.segment(*obstacle_inliers);
 
         extractor_poly.setInputCloud(input_sum_pcPtr_);
@@ -250,6 +319,7 @@ PerceptionClustering::planeRemoval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& inpcP
         surfaces_lists_.push_back(surface_object_msg);
 
         extractor_poly.setInputCloud(obstacles_pcPtr_);
+<<<<<<< HEAD
         extractor_poly.setIndices(plane_inliers);
         extractor_poly.setNegative(true);
         extractor_poly.filter(*obstacles_pcPtr_);
@@ -261,6 +331,12 @@ PerceptionClustering::planeRemoval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& inpcP
         denoise_filter.setMeanK (60);
         denoise_filter.setStddevMulThresh (0.9);
         denoise_filter.filter (*obstacles_pcPtr_);
+=======
+        extractor_poly.setIndices(plan_inliers);
+        extractor_poly.setNegative(true);
+        extractor_poly.filter(*obstacles_pcPtr_);
+
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
 
         objects_cloud_pub_.publish(PCLtoPointCloud2msg(objects_pcPtr_));
         plane_cloud_pub_.publish(PCLtoPointCloud2msg(plane_pcPtr_));
@@ -333,10 +409,14 @@ PerceptionClustering::euclideanCluster(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in
     clusters_object_msg.properties.resize(1);
     clusters_object_msg.properties[0].name = "color";
     clusters_object_msg.properties[0].value = color_extractor(avgPointHSV);
+<<<<<<< HEAD
 
     shape_extractor::projectPointCloud(clusterPtr, plan_coefficients_, obj_name);
 
 
+=======
+   
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
     cluster_result.push_back(clusters_object_msg);
     i++;
 
@@ -473,8 +553,12 @@ PerceptionClustering::scanScene(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input_pc
   transform_frame(pt_head, 0.0, 0.0, 0.0, "base_link", "head_camera_rgb_optical_frame");
   ROS_INFO("the head position point: %f, %f, %f", pt_head.point.x, pt_head.point.y, pt_head.point.z);
   head_lookat(1.0, 0.0, pt_head.point.z / 2, "base_link");
+<<<<<<< HEAD
   ros::Duration(4.0).sleep();
   // ros::Duration(1.0).sleep();
+=======
+  ros::Duration(1.0).sleep();
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
   initial_transformStamped = lookup_transform( "head_camera_rgb_optical_frame", "base_link");
   tf::transformMsgToTF(initial_transformStamped.transform, initial_transform);
   int full_range = degree_end - degree_start;
@@ -486,14 +570,19 @@ PerceptionClustering::scanScene(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input_pc
     double cur_degree = degree_start + i*30;
     ROS_INFO("current degree %f, point %f, %f, %f ", cur_degree, 1.0, sin( cur_degree * PI / 180.0 ), pt_head.point.z);
     head_lookat(1.0, sin( cur_degree * PI / 180.0 ), pt_head.point.z / 2, "base_link");
+<<<<<<< HEAD
     ros::Duration(5.0).sleep();
     // ros::Duration(1.5).sleep();
+=======
+    ros::Duration(1.0).sleep();
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
 
     transformStamped = lookup_transform("base_link", "head_camera_rgb_optical_frame");
     tf::Transform transform;
     tf::transformMsgToTF(transformStamped.transform, transform);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed_cloud (new pcl::PointCloud<pcl::PointXYZRGB> ());
     pcl_ros::transformPointCloud (*input_pcPtr_, *transformed_cloud, transform);
+<<<<<<< HEAD
     ros::Duration(2.0).sleep();
     // ros::Duration(1.0).sleep();
     *sum_pcPtr += *transformed_cloud;
@@ -502,6 +591,13 @@ PerceptionClustering::scanScene(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& input_pc
   }
   head_lookat(1.0, 0.0, pt_head.point.z / 2, "base_link");
   ros::Duration(3.0).sleep();
+=======
+    *sum_pcPtr += *transformed_cloud;
+
+  }
+  ros::Duration(1.0).sleep();
+  head_lookat(1.0, 0.0, pt_head.point.z / 2, "base_link");
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
   
   pcl_ros::transformPointCloud (*sum_pcPtr, *input_pcPtr, initial_transform);
 
@@ -570,6 +666,7 @@ PerceptionClustering::pcPtr2Objectmsg(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in_
   input_object_msg.primitives.resize(1);
   shape_msgs::SolidPrimitive primitive;
   geometry_msgs::Pose pose;
+<<<<<<< HEAD
   if (name == "plane")
   {
     extractUnorientedBoundingBox(*transformed_pcPtr, primitive, pose);
@@ -582,6 +679,12 @@ PerceptionClustering::pcPtr2Objectmsg(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in_
   input_object_msg.primitive_poses[0] = pose;
   input_object_msg.primitives[0] = primitive;
   input_object_msg.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
+=======
+  extractUnorientedBoundingBox(*transformed_pcPtr, primitive, pose);
+  input_object_msg.primitive_poses[0] = pose;
+  input_object_msg.primitives[0] = primitive;
+  
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
   ROS_INFO("%s: ", name);
   ROS_INFO("cluster primitives: %f, %f, %f ",
             input_object_msg.primitives[0].dimensions[0],
@@ -594,6 +697,7 @@ PerceptionClustering::pcPtr2Objectmsg(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in_
 
 }
 
+<<<<<<< HEAD
 void 
 PerceptionClustering::filter_planpc(pcl::PointCloud<pcl::PointXYZRGB>::Ptr plane_source_pcPtr, pcl::PointCloud<pcl::PointXYZRGB>::Ptr plane_out_pcPtr)
 {
@@ -657,4 +761,6 @@ PerceptionClustering::extract_boundingbox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr
   ROS_INFO("in exract_boundingbox, max point: %d, %d, %d, %d", oobb.m_maxPoint[0], oobb.m_maxPoint[1], oobb.m_maxPoint[2]);
 }
 
+=======
+>>>>>>> 215b07473b0c805c0255e2ee65b574780f713b93
 }// end of fetch_demos_perception namespace
