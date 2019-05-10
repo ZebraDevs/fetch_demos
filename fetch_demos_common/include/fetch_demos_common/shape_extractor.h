@@ -12,5 +12,9 @@ void projectPointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr object,
                        std::string obj_name);
 
 
+void
+collectPointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr object,
+                  std::string obj_name);
+
 }// end of namespace
 #endif

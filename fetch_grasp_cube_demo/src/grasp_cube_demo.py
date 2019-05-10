@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import copy
 from math import cos, sin, pi, sqrt, pow, fabs, fmod
->>>>>>> b770dc2cdfc83f627cd445d01e10b5529ec0667b
 import actionlib
 import rospy
 import tf2_geometry_msgs

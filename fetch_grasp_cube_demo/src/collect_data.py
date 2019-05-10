@@ -184,8 +184,6 @@ if __name__ == "__main__":
     rospy.loginfo("successfully initialized")
 
     head_action.look_at(1.0, 0.0, 0.5, "base_link")
-    place_result = False
-    picking_result = False
 
     while not rospy.is_shutdown():
         find_object_success = perception_client.find_objects()
@@ -199,68 +197,10 @@ if __name__ == "__main__":
             surface_lists = perception_client.get_surface_list()
             grasping_client.clear_scene()
 
-            for obj in graspable_obj_lists:
-            # obj = graspable_obj_lists[0]
-                head_action.look_at(obj.primitive_poses[0].position.x, 
-                                    obj.primitive_poses[0].position.y,
-                                    obj.primitive_poses[0].position.z,
-                                    "base_link")
-                rospy.sleep(1.5)
-                grasping_client.remove_previous_objects()
-                grasping_client.update_scene(obj_lists, surface_lists)
-                grasping_client.print_planning_scene_objs()
-                
-                grasping_client.stow()
-                rospy.sleep(2.0)
-                picking_result = grasping_client.pick(obj,
-                                                    close_gripper_to=close_gripper_to_, 
-                                                    tolerance=tolerance_, 
-                                                    x_diff_pick=x_diff_pick_, 
-                                                    z_diff_pick=z_diff_pick_, 
-                                                    x_diff_grasp=x_diff_grasp_, 
-                                                    z_diff_grasp=z_diff_grasp_)
-                # picking_result = grasping_client.pick_with_pick_place_interface(obj,
-                #                                                                 "plane",
-                #                                                                 x_diff_grasp=x_diff_grasp_,
-                #                                                                 z_diff_grasp=z_diff_grasp_)
-                #                                                                 z_diff_grasp=z_diff_grasp_)
-                rospy.sleep(2.5)
-
-                if picking_result:
-                    place_poseStamped = make_poseStamped('base_link', obj.primitive_poses[0], [0.0, 0.0, 0.0, 0.0])
-                    place_poseStamped.pose.position.z += z_diff_bin_
-
-                    place_result = grasping_client.place(place_poseStamped,
-                                                        obj,
-                                                        tolerance=tolerance_, 
-                                                        x_diff_step=x_diff_bin_step_, 
-                                                        z_diff_step=z_diff_bin_step_, 
-                                                        x_diff_min=x_diff_bin_min_)
-                    rospy.sleep(2.5)
-                    
-                    if place_result is False:
-                        grasping_client.gripper_client.fully_open_gripper()
-                        grasping_client.stow()
-                        rospy.sleep(1.5)
-                        grasping_client.remove_attached_object(obj.name, "gripper_link")
-                        grasping_client.clear_scene()                    
-                else:
-                    grasping_client.gripper_client.fully_open_gripper()
-                    grasping_client.stow()
-                    rospy.sleep(1.5)
-                    grasping_client.remove_attached_object(obj.name, "gripper_link")
-                    grasping_client.clear_scene()                    
-
-                rospy.loginfo("scene updated, waiting")
-                rospy.sleep(2.5)
-                
-                grasping_client.remove_collision_object(obj.name)
-                grasping_client.gripper_client.fully_open_gripper()
-                rospy.sleep(1.5)
-                grasping_client.stow()
-                grasping_client.remove_previous_objects()
-                obj_lists = [x for x in obj_lists if x.name != obj.name]
-        
+            grasping_client.remove_previous_objects()
+            grasping_client.update_scene(obj_lists, surface_lists)
+            grasping_client.print_planning_scene_objs()
+            raw_input('done with 1 round, hit enter to continue')
         else:
             continue
 

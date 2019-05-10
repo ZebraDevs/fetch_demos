@@ -25,7 +25,7 @@ class graspingClient(object):
         self.angle = angle_min
         self.angle_step = angle_step
         self.angle_max = angle_max
-
+        self.PLAN_ONLY = False
         self.planning_scene = PlanningSceneInterface("base_link")
         self.planning_scene_diff_publisher = rospy.Publisher("planning_scene", PlanningScene, queue_size=1)
 
@@ -39,6 +39,7 @@ class graspingClient(object):
         self.tfBuffer = tf2_ros.Buffer()
         self.marker_pub = rospy.Publisher("grasp_pose_marker", Marker, queue_size=5)
         listener = tf2_ros.TransformListener(self.tfBuffer)
+        self.pickplace = PickPlaceInterface("arm", "gripper", plan_only=self.PLAN_ONLY, verbose=True)
 
     def tuck(self):
         joints = ["shoulder_pan_joint", "shoulder_lift_joint", "upperarm_roll_joint",
@@ -157,7 +158,6 @@ class graspingClient(object):
 
     def pick(self, obj, close_gripper_to=0.02, retry=1, tolerance=0.01, x_diff_pick=-0.01, z_diff_pick=0.1, x_diff_grasp=-0.01, z_diff_grasp=0.01):
         rospy.loginfo("plicking the object, %s", obj.name)
-        # self.publish_coord(obj.primitive_poses[0])
         self.gripper_client.fully_open_gripper()
         angle_tmp = self.angle
         input_retry = retry
@@ -275,105 +275,48 @@ class graspingClient(object):
                           qua1.w * qua2.y - qua1.x * qua2.z + qua1.y * qua2.w + qua1.z * qua2.x,
                           qua1.w * qua2.z + qua1.x * qua2.y - qua1.y * qua2.x + qua1.z * qua2.w,
                           qua1.w * qua2.w - qua1.x * qua2.x - qua1.y * qua2.y - qua1.z * qua2.z)
+    
+    def pick_with_pick_place_interface(self, obj, support_surface_name,  x_diff_grasp=-0.005, z_diff_grasp=0.01):
+        grasps = []
+        angle_tmp = self.angle
+        while angle_tmp <= self.angle_max:
+            radien = (angle_tmp / 2.0) * (pi / 180.0)
+            rot_orientation = Quaternion(0.0, sin(radien), 0.0, cos(radien))
+            obj_ori = obj.primitive_poses[0].orientation
+            obj_quat = [obj_ori.x, obj_ori.y, obj_ori.z, obj_ori.w]
+            roll, pitch, yaw = transformations.euler_from_quaternion(obj_quat)
+            yaw_quat = transformations.quaternion_from_euler(0.0, 0.0, yaw)
+            yaw_orientation = Quaternion(yaw_quat[0], yaw_quat[1], yaw_quat[2], yaw_quat[3])
 
-    def publish_coord(self, pose_input):
-        pose = copy.deepcopy(pose_input)
-        marker = Marker()
-        marker.header.frame_id = "base_link"
-        marker.header.stamp = rospy.Time.now()
-        marker.ns = "obj_orientation"
-        marker.id = 0
-        marker.type = 0
-        marker.pose = pose
-        marker.action = Marker.ADD
-        marker.scale.x = 0.15
-        marker.scale.y = 0.01
-        marker.scale.z = 0.01
+            gripper_orientation = self.quaternion_multiply(yaw_orientation, rot_orientation)
+            pose_stamped = self.make_poseStamped("gripper_link", obj.primitive_poses[0], gripper_orientation)
+            pose_stamped.pose.position.x += x_diff_grasp
+            pose_stamped.pose.position.z += 0.1
 
-        marker.color.r = 0.0
-        marker.color.g = 1.0
-        marker.color.b = 1.0
-        marker.color.a = 1.0
+            g = Grasp()
+            g.grasp_pose = pose_stamped
+            g.grasp_pose.header.stamp = rospy.Time.now()
+            g.grasp_pose.header.frame_id = "gripper_link"
+            g.pre_grasp_approach.direction.header = g.grasp_pose.header
+            g.pre_grasp_approach.direction.vector.x = 0
+            g.pre_grasp_approach.direction.vector.y = 0
+            g.pre_grasp_approach.direction.vector.z = 1
+            g.pre_grasp_approach.desired_distance = 0.1
 
-        obj_ori = pose.orientation
-        obj_quat = [obj_ori.x, obj_ori.y, obj_ori.z, obj_ori.w]
-        roll, pitch, yaw = transformations.euler_from_quaternion(obj_quat)
+            g.post_grasp_retreat.direction.header = g.grasp_pose.header
+            g.post_grasp_retreat.direction.vector.x = 0
+            g.post_grasp_retreat.direction.vector.y = 0
+            g.post_grasp_retreat.direction.vector.z = 1
+            g.post_grasp_retreat.desired_distance = 0.1
 
-        x_quat = transformations.quaternion_from_euler(roll, 0.0, 0.0)
-        x_orientation = Quaternion(x_quat[0], x_quat[1], x_quat[2], x_quat[3])
+            grasps.append(g) 
+            angle_tmp += self.angle_step
 
-        y_quat = transformations.quaternion_from_euler(0.0, pitch, 0.0)
-        y_orientation = Quaternion(y_quat[0], y_quat[1], y_quat[2], y_quat[3])
+        success, pick_result = self.pickplace.pick_with_retry(obj.name, grasps, support_name=support_surface_name, scene=self.planning_scene)
+        rospy.sleep(1.0)
+
+        return success
 
 
-        z_quat = transformations.quaternion_from_euler(0.0, 0.0, yaw)
-        z_orientation = Quaternion(z_quat[0], z_quat[1], z_quat[2], z_quat[3])
 
-        mx = Marker()
-        mx.header.frame_id = "base_link"
-        mx.header.stamp = rospy.Time.now()
-        mx.ns = "grasping_node_x"
-        mx.id = 0
-        mx.type = 0  # 0 is arrow
-        mx.action = Marker.ADD
 
-        mx.pose = pose
-        mx.pose.orientation = x_orientation
-
-        mx.scale.x = 0.1
-        mx.scale.y = 0.01
-        mx.scale.z = 0.01
-
-        mx.color.r = 1.0
-        mx.color.g = 0.0
-        mx.color.b = 0.0
-        mx.color.a = 1.0
-
-        my = Marker()
-        my.header.frame_id = "base_link"
-        my.header.stamp = rospy.Time.now()
-        my.ns = "grasping_node_y"
-        my.id = 0
-        my.type = 0  # 0 is arrow
-        my.action = Marker.ADD
-
-        my.pose = pose
-        my.pose.orientation = y_orientation
-
-        my.scale.x = 0.1
-        my.scale.y = 0.01
-        my.scale.z = 0.01
-
-        my.color.r = 0.0
-        my.color.g = 1.0
-        my.color.b = 0.0
-        my.color.a = 1.0
-
-        mz = Marker()
-        mz.header.frame_id = "base_link"
-        mz.header.stamp = rospy.Time.now()
-        mz.ns = "grasping_node_z"
-        mz.id = 0
-        mz.type = 0  # 0 is arrow
-        mz.action = Marker.ADD
-
-        mz.pose = pose
-        mz.pose.orientation = z_orientation
-
-        mz.scale.x = 0.1
-        mz.scale.y = 0.01
-        mz.scale.z = 0.01
-
-        mz.color.r = 0.0
-        mz.color.g = 0.0
-        mz.color.b = 1.0
-        mz.color.a = 1.0
-        q = Quaternion(0.0, 0.0, 0.707, 0.707)
-        # mx.pose.orientation = self.quaternion_multiply(mx.pose.orientation, q)
-        # my.pose.orientation = self.quaternion_multiply(my.pose.orientation, q)
-        # mz.pose.orientation = self.quaternion_multiply(mz.pose.orientation, q)
-        rospy.loginfo("publishing the marker")
-        self.marker_pub.publish(marker)
-        self.marker_pub.publish(mx)
-        self.marker_pub.publish(my)
-        self.marker_pub.publish(mz)

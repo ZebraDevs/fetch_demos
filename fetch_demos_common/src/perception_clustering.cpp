@@ -217,7 +217,8 @@ PerceptionClustering::planeRemoval(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& inpcP
       filter_planpc(plane_pcPtr_, plane_pcPtr_);
       hull.setInputCloud (plane_pcPtr_);
       hull.reconstruct(*hull_points);
-      if(hull.getDimension() == 2){
+      ROS_INFO("hull.getDimension() %i", hull.getDimension());
+      if(hull.getDimension() >= 2){
         pcl::ExtractPolygonalPrismData<pcl::PointXYZRGB> prism;
         prism.setInputCloud(inpcPtr);
         prism.setInputPlanarHull(hull_points);
@@ -334,7 +335,7 @@ PerceptionClustering::euclideanCluster(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in
     clusters_object_msg.properties[0].name = "color";
     clusters_object_msg.properties[0].value = color_extractor(avgPointHSV);
 
-    // shape_extractor::projectPointCloud(clusterPtr, plan_coefficients_, obj_name);
+    shape_extractor::collectPointCloud(clusterPtr, obj_name);
 
 
     cluster_result.push_back(clusters_object_msg);

@@ -9,7 +9,7 @@ planning:
 grasping:
   x_diff_pick : -0.01
   z_diff_pick : 0.1
-  x_diff_grasp : -0.01
+  x_diff_grasp : -0.004
   z_diff_grasp : 0.015
   angle_min : 40.0
   angle_step : 10.0
