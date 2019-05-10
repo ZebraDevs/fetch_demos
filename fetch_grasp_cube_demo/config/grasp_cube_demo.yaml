@@ -7,7 +7,7 @@ planning:
   planner : "KPIECEkConfigDefault"
   move_group : "arm"
 grasping:
-  x_diff_pick : -0.01 
+  x_diff_pick : -0.01
   z_diff_pick : 0.1
   x_diff_grasp : -0.01
   z_diff_grasp : 0.015

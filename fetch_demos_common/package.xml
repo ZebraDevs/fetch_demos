@@ -12,7 +12,7 @@
   <maintainer email="ijwo@fetchrobotics.com">I-Chen Jwo</maintainer>
   <license>BSD</license>
   <url>http://ros.org/wiki/fetch_demos_common</url>
-  
+
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>message_generation</build_depend>

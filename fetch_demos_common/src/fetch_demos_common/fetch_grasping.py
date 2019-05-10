@@ -25,15 +25,15 @@ class graspingClient(object):
         self.angle = angle_min
         self.angle_step = angle_step
         self.angle_max = angle_max
-        
+
         self.planning_scene = PlanningSceneInterface("base_link")
         self.planning_scene_diff_publisher = rospy.Publisher("planning_scene", PlanningScene, queue_size=1)
-        
+
         self.move_group = MoveGroupInterface(self.move_group, "base_link")
         self.move_group.setPlannerId(self.planner )
         self.gripper_client = GripperClient()
         self.attached_obj_pub = rospy.Publisher("attached_collision_object", AttachedCollisionObject, queue_size=10)
-        self.planning_scene.is_diff = True 
+        self.planning_scene.is_diff = True
         self._pick_action = actionlib.SimpleActionClient("place", PlaceAction)
         self._pick_action.wait_for_server()
         self.tfBuffer = tf2_ros.Buffer()
@@ -93,44 +93,44 @@ class graspingClient(object):
         pose_stamped.header.frame_id = frame
         pose_stamped.pose = copy.deepcopy(pose)
         if orientation == None:
-            pose_stamped.pose.orientation.x = 0.0 
-            pose_stamped.pose.orientation.y = 0.707 
-            pose_stamped.pose.orientation.z = 0.0 
+            pose_stamped.pose.orientation.x = 0.0
+            pose_stamped.pose.orientation.y = 0.707
+            pose_stamped.pose.orientation.z = 0.0
             pose_stamped.pose.orientation.w = 0.707
         else:
             pose_stamped.pose.orientation = orientation
         return pose_stamped
     def transform_pose(self, pose_stamped, target_frame):
-        
+
         transform = self.tfBuffer.lookup_transform(target_frame,
-                                        pose_stamped.header.frame_id, 
-                                        rospy.Time(0), 
+                                        pose_stamped.header.frame_id,
+                                        rospy.Time(0),
                                         rospy.Duration(1.0))
 
         pose_transformed = tf2_geometry_msgs.do_transform_pose(pose_stamped, transform)
         return pose_transformed
 
-        
+
     def makeAttach(self, obj, link_name = 'gripper_link',
                    touch_links=['gripper_link', 'l_gripper_finger_link', 'r_gripper_finger_link']):
-        
+
         self.planning_scene.removeCollisionObject(obj.name, False)
         obj_pose = self.make_poseStamped('base_link', obj.primitive_poses[0], obj.primitive_poses[0].orientation)
         attached_pose = self.transform_pose(obj_pose, link_name)
-        self.planning_scene.attachBox(obj.name, 
+        self.planning_scene.attachBox(obj.name,
                                       obj.primitives[0].dimensions[0],
                                       obj.primitives[0].dimensions[1],
-                                      obj.primitives[0].dimensions[2], 
-                                      attached_pose.pose.position.x, 
-                                      attached_pose.pose.position.y, 
+                                      obj.primitives[0].dimensions[2],
+                                      attached_pose.pose.position.x,
+                                      attached_pose.pose.position.y,
                                       attached_pose.pose.position.z,
-                                      link_name, 
+                                      link_name,
                                       touch_links)
         self.print_planning_scene_objs()
-        
+
     def makeDetach(self, obj):
-        self.planning_scene.addSolidPrimitive(obj.name, 
-                                    obj.primitives[0], 
+        self.planning_scene.addSolidPrimitive(obj.name,
+                                    obj.primitives[0],
                                     obj.primitive_poses[0],
                                     use_service=False)
 
@@ -139,10 +139,10 @@ class graspingClient(object):
     def update_scene(self, object_list, support_surface_lists):
         # add objects as primitives
         for obj in object_list:
-            self.planning_scene.addSolidPrimitive(obj.name, 
-                                              obj.primitives[0], 
+            self.planning_scene.addSolidPrimitive(obj.name,
+                                              obj.primitives[0],
                                               obj.primitive_poses[0],
-                                              use_service=True)     
+                                              use_service=True)
         # param
         for surface in support_surface_lists:
             self.planning_scene.addSolidPrimitive(surface.name,
@@ -189,7 +189,7 @@ class graspingClient(object):
                     break
                 else:
                     if move_pose_result.error_code.val == MoveItErrorCodes.NO_IK_SOLUTION:
-                        rospy.loginfo("no valid IK found")                
+                        rospy.loginfo("no valid IK found")
                     rospy.loginfo(move_pose_result.error_code.val)
                 curr_retry -= 1
             angle_tmp += self.angle_step
@@ -219,7 +219,7 @@ class graspingClient(object):
                     break
                 else:
                     if move_pose_result.error_code.val == MoveItErrorCodes.NO_IK_SOLUTION:
-                        rospy.loginfo("no valid IK found")       
+                        rospy.loginfo("no valid IK found")
                     rospy.loginfo(move_pose_result.error_code.val)
                 curr_retry -= 1
             angle_tmp  += self.angle_step
@@ -240,7 +240,7 @@ class graspingClient(object):
                 break
             else:
                 if move_pose_result.error_code.val == MoveItErrorCodes.NO_IK_SOLUTION:
-                    rospy.loginfo("no valid IK found")       
+                    rospy.loginfo("no valid IK found")
                 rospy.loginfo(move_pose_result.error_code.val)
                 current_retry -= 1
                 if current_retry == 0:
@@ -265,17 +265,17 @@ class graspingClient(object):
         o.object.operation = CollisionObject.REMOVE
         o.object.id = name
         self.attached_obj_pub.publish(o)
-        
+
     def remove_collision_object(self, name):
         self.planning_scene.removeCollisionObject(name, True)
 
     def quaternion_multiply(self, qua1, qua2):
 
-        return Quaternion(qua1.w * qua2.x + qua1.x * qua2.w + qua1.y * qua2.z - qua1.z * qua2.y,  
-                          qua1.w * qua2.y - qua1.x * qua2.z + qua1.y * qua2.w + qua1.z * qua2.x,  
+        return Quaternion(qua1.w * qua2.x + qua1.x * qua2.w + qua1.y * qua2.z - qua1.z * qua2.y,
+                          qua1.w * qua2.y - qua1.x * qua2.z + qua1.y * qua2.w + qua1.z * qua2.x,
                           qua1.w * qua2.z + qua1.x * qua2.y - qua1.y * qua2.x + qua1.z * qua2.w,
-                          qua1.w * qua2.w - qua1.x * qua2.x - qua1.y * qua2.y - qua1.z * qua2.z)   
-    
+                          qua1.w * qua2.w - qua1.x * qua2.x - qua1.y * qua2.y - qua1.z * qua2.z)
+
     def publish_coord(self, pose_input):
         pose = copy.deepcopy(pose_input)
         marker = Marker()
@@ -377,5 +377,3 @@ class graspingClient(object):
         self.marker_pub.publish(mx)
         self.marker_pub.publish(my)
         self.marker_pub.publish(mz)
-
-

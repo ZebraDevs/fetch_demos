@@ -2,24 +2,24 @@
 #define FETCH_DEMOS_COMMON_PERCEPTION_CLUSTERING_H
 // PCL
 #include <pcl/point_cloud.h>
-#include <pcl_conversions/pcl_conversions.h>   
+#include <pcl_conversions/pcl_conversions.h>
 // ros
 #include <actionlib/client/simple_action_client.h>
 #include <control_msgs/PointHeadAction.h>
 #include <grasping_msgs/Object.h>
 #include <geometry_msgs/Pose.h>
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
-#include <ros/node_handle.h>                  
-#include <ros/publisher.h>                   
-#include <ros/subscriber.h>                   
-#include <tf2_ros/buffer.h>               
-#include "fetch_demos_common/GetObjectsResult.h"    
-#include <sensor_msgs/PointCloud2.h>                
-#include <shape_msgs/SolidPrimitive.h>              
-#include <tf2/transform_storage.h>                  
-#include <tf2_ros/transform_listener.h>             
-#include <geometry_msgs/PointStamped.h>             
-#include <boost/signals2/detail/foreign_ptr.hpp>  
+#include <ros/node_handle.h>
+#include <ros/publisher.h>
+#include <ros/subscriber.h>
+#include <tf2_ros/buffer.h>
+#include "fetch_demos_common/GetObjectsResult.h"
+#include <sensor_msgs/PointCloud2.h>
+#include <shape_msgs/SolidPrimitive.h>
+#include <tf2/transform_storage.h>
+#include <tf2_ros/transform_listener.h>
+#include <geometry_msgs/PointStamped.h>
+#include <boost/signals2/detail/foreign_ptr.hpp>
 #define PI 3.14159265
 namespace fetch_demos_perception
 {
@@ -70,7 +70,7 @@ private:
 
     std::vector<grasping_msgs::Object> surfaces_lists_;
 
-    // params 
+    // params
     double debug_msg_;
     double filter_z_min_, filter_z_max_;
     double dwnsample_size_;

@@ -43,7 +43,7 @@ int main(int argc, char** argv){
         double new_time =ros::Time::now().toSec();
         if(new_time - old_time > 5.0)
         {
-            obj_list = grasp_suggestion_node.getObjectList();   
+            obj_list = grasp_suggestion_node.getObjectList();
             old_time = new_time;
         }
         pub.publish(obj_list);
@@ -51,7 +51,7 @@ int main(int argc, char** argv){
         // loop_rate.sleep();
 
     }
-    
+
     ros::spin();
     return 0;
 }

@@ -38,7 +38,7 @@ namespace fetch_demmos_common
     }
 
 
-    rail_manipulation_msgs::SegmentedObject 
+    rail_manipulation_msgs::SegmentedObject
     GraspSuggestionInterface::object2SegmentedObject(grasping_msgs::Object obj_msg)
     {
         rail_manipulation_msgs::SegmentedObject transformed_msg;
@@ -56,7 +56,7 @@ namespace fetch_demmos_common
         bv.dimensions.x = obj_msg.primitive_poses[0].position.x;
         bv.dimensions.y = obj_msg.primitive_poses[0].position.y;
         bv.dimensions.z = obj_msg.primitive_poses[0].position.z;
-        
+
         transformed_msg.bounding_volume = bv;
         transformed_msg.width = obj_msg.primitives[0].dimensions[0];
         transformed_msg.depth = obj_msg.primitives[0].dimensions[1];
