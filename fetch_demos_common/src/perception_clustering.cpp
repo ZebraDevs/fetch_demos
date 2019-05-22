@@ -335,7 +335,7 @@ PerceptionClustering::euclideanCluster(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in
     clusters_object_msg.properties[0].name = "color";
     clusters_object_msg.properties[0].value = color_extractor(avgPointHSV);
 
-    shape_extractor::collectPointCloud(clusterPtr, obj_name);
+    // shape_extractor::collectPointCloud(clusterPtr, obj_name);
 
 
     cluster_result.push_back(clusters_object_msg);
