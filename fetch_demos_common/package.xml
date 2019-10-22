@@ -6,10 +6,12 @@
   <description>
     common code shared by for fetch_demos.
   </description>
-  <maintainer email="amoriarty@fetchrobotics.com">Alex Moriarty</maintainer>
   <maintainer email="narora@fetchrobotics.com">Niharika Arora</maintainer>
   <maintainer email="selliott@fetchrobotics.com">Sarah Elliott</maintainer>
-  <maintainer email="ijwo@fetchrobotics.com">I-Chen Jwo</maintainer>
+  <maintainer email="csaldanha@fetchrobotics.com">Carl Saldanha</maintainer>
+  <maintainer email="erelson@fetchrobotics.com">Eric Relson</maintainer>
+  <maintainer email="opensource@fetchrobotics.com">Fetch Robotics Open Source Team</maintainer>
+  <author>I-Chen Jwo</maintainer>
   <license>BSD</license>
   <url>http://ros.org/wiki/fetch_demos_common</url>
 

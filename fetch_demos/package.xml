@@ -4,7 +4,11 @@
   <name>fetch_demos</name>
   <version>0.0.0</version>
   <description>Fetch Demos: demonstrations which run on Fetch robots, on Hardware and in Gazebo</description>
-  <maintainer email="amoriarty@fetchrobotics.com">Alex Moriarty</maintainer>
+  <maintainer email="selliott@fetchrobotics.com">Sarah Elliott</maintainer>
+  <maintainer email="narora@fetchrobotics.com">Niharika Arora</maintainer>
+  <maintainer email="csaldanha@fetchrobotics.com">Carl Saldanha</maintainer>
+  <maintainer email="erelson@fetchrobotics.com">Eric Relson</maintainer>
+  <maintainer email="opensource@fetchrobotics.com">Fetch Robotics Open Source Team</maintainer>
 
   <license>BSD</license>
   <url type="website">https://docs.fetchrobotics.com</url>
@@ -12,7 +16,7 @@
   <url type="bugtracker">https://github.com/fetchrobotics/fetch_demos/issues</url>
   <url type="wiki">https://wiki.ros.org/fetch_demos</url>
 
-  <author email="amoriarty@fetchrobotics.com">Alex Moriarty</author>
+  <author>Alex Moriarty</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
